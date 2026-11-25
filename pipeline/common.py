@@ -6,6 +6,7 @@ import hashlib
 import json
 import os
 import random
+import re
 import subprocess
 import time
 import uuid
@@ -22,6 +23,9 @@ STORYBOARD = ROOT / "storyboard.json"
 
 load_dotenv(ROOT / ".env")
 
+# Stage modules must use common.OUTPUTS / common.RUNS_LOG at call time (not
+# `from .common import OUTPUTS`) so tests can point them at a temp folder.
+
 # One id per invocation; `python run.py film` shares it across all stages.
 RUN_ID = os.environ.setdefault(
     "HERITAGE_RUN_ID",
@@ -29,6 +33,7 @@ RUN_ID = os.environ.setdefault(
 )
 
 RETRYABLE_STATUS = {429, 500, 502, 503, 504}
+MAX_RETRY_WAIT_S = 120  # longer than this means a daily quota, not a burst limit
 
 
 class ModelCallError(RuntimeError):
@@ -58,6 +63,29 @@ def log_event(event: str, stage: str, **fields) -> dict:
     return record
 
 
+def rel(path: Path | str) -> str:
+    """Path relative to the repo when possible (for logs and messages)."""
+    path = Path(path)
+    try:
+        return str(path.resolve().relative_to(ROOT))
+    except ValueError:
+        return str(path)
+
+
+def out_dir(*parts: str) -> Path:
+    folder = OUTPUTS.joinpath(*parts)
+    folder.mkdir(parents=True, exist_ok=True)
+    return folder
+
+
+def write_atomic(path: Path, data: bytes) -> None:
+    """Write to a temp name then rename, so a crash never leaves a half file
+    that the cache would later mistake for a finished output."""
+    tmp = path.with_name(path.name + ".part")
+    tmp.write_bytes(data)
+    tmp.replace(path)
+
+
 # ---------- hashing and cache ----------
 
 def canonical_hash(obj) -> str:
@@ -76,14 +104,12 @@ def file_hash(path: Path | str) -> str:
 
 def cache_path(stage_dir: str, name: str, key: str, ext: str) -> Path:
     """outputs/<stage_dir>/<name>_<first 12 chars of key>.<ext>"""
-    folder = OUTPUTS / stage_dir
-    folder.mkdir(parents=True, exist_ok=True)
-    return folder / f"{name}_{key[:12]}.{ext}"
+    return out_dir(stage_dir) / f"{name}_{key[:12]}.{ext}"
 
 
 def cache_hit(path: Path, stage: str, shot: str | None, key: str, force: bool = False) -> bool:
     if path.exists() and not force:
-        log_event("cache_hit", stage, shot=shot, cache_key=key, output=str(path.relative_to(ROOT)))
+        log_event("cache_hit", stage, shot=shot, cache_key=key, output=rel(path))
         return True
     return False
 
@@ -91,7 +117,7 @@ def cache_hit(path: Path, stage: str, shot: str | None, key: str, force: bool = 
 # ---------- retries ----------
 
 def call_with_retries(fn, *, stage: str, shot: str | None, provider: str, model: str,
-                      params: dict, seed: int | None = None, attempts: int = 3,
+                      params: dict, seed: int | None = None, attempts: int = 4,
                       cache_key: str | None = None, output: str | None = None):
     """Run fn() (ONE request) up to `attempts` times with exponential backoff.
 
@@ -111,9 +137,13 @@ def call_with_retries(fn, *, stage: str, shot: str | None, provider: str, model:
                 err, (requests.ConnectionError, requests.Timeout))
             log_event("model_call", stage, **common, attempt=attempt, status="error",
                       http_status=status, latency_s=latency, error=str(err)[:300])
+            wait = retry_delay(err, attempt) if retryable else 0
+            if wait > MAX_RETRY_WAIT_S:  # a daily quota: waiting hours inside a run is pointless
+                raise ModelCallError(f"{provider}/{model}: quota exhausted, provider asks to wait "
+                                     f"{wait / 3600:.1f} h. Cached outputs are kept; rerun later. "
+                                     f"{str(err)[:200]}") from err
             if not retryable or attempt == attempts:
                 raise ModelCallError(f"{provider}/{model} failed: {str(err)[:300]}") from err
-            wait = 2 ** attempt + random.uniform(0, 1)
             print(f"  retry {attempt}/{attempts - 1} in {wait:.1f}s ({status or type(err).__name__})")
             time.sleep(wait)
         else:
@@ -121,6 +151,34 @@ def call_with_retries(fn, *, stage: str, shot: str | None, provider: str, model:
             log_event("model_call", stage, **common, attempt=attempt, status="ok",
                       latency_s=latency, **meta)
             return result
+
+
+def retry_delay(err: Exception, attempt: int) -> float:
+    """How long to wait before the next attempt.
+
+    A 429 from a free tier usually says how long to wait ("Please retry in 39s",
+    "retry in 17h50m8s", or a Retry-After header). A fixed 2-4 s backoff just
+    burns the attempts (seen with Gemini TTS at 3 requests per minute).
+    """
+    resp = getattr(err, "response", None)
+    if resp is not None and getattr(resp, "status_code", None) == 429:
+        header = (resp.headers or {}).get("Retry-After", "")
+        if header.replace(".", "", 1).isdigit():
+            return float(header) + 1
+        suggested = parse_wait(str(err))
+        if suggested is not None:
+            return suggested + 1
+        return 20.0 * attempt
+    return 2 ** attempt + random.uniform(0, 1)
+
+
+def parse_wait(text: str) -> float | None:
+    """'retry in 39s' -> 39.0, 'retry in 17h50m8s' -> 64208.0, else None."""
+    m = re.search(r"retry in ((?:[0-9.]+[hms])+)", text, re.IGNORECASE)
+    if not m:
+        return None
+    units = {"h": 3600, "m": 60, "s": 1}
+    return sum(float(n) * units[u] for n, u in re.findall(r"([0-9.]+)([hms])", m.group(1)))
 
 
 def check_http(resp: requests.Response) -> requests.Response:
@@ -134,6 +192,14 @@ def check_http(resp: requests.Response) -> requests.Response:
 
 def ffmpeg(*args: str) -> None:
     subprocess.run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", *args], check=True)
+
+
+def probe(path: Path | str) -> dict:
+    """ffprobe as a dict: format + streams."""
+    out = subprocess.run(
+        ["ffprobe", "-v", "error", "-show_format", "-show_streams", "-of", "json", str(path)],
+        check=True, capture_output=True, text=True).stdout
+    return json.loads(out)
 
 
 def duration_s(path: Path | str) -> float:

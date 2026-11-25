@@ -5,6 +5,7 @@ from __future__ import annotations
 import base64
 import io
 import math
+import os
 import wave
 from pathlib import Path
 
@@ -25,7 +26,23 @@ KLEIN_OUT_TILE, KLEIN_IN_TILE, USD_PER_NEURON = 26.05, 5.37, 0.011 / 1000
 
 def gemini_text(prompt: str, *, stage: str, shot: str | None = None,
                 json_mode: bool = False, temperature: float = 0.7) -> str:
-    model = env("GEMINI_TEXT_MODEL", "gemini-3.8-flash")
+    """Flash first; if it is still overloaded after retries (503 'high demand',
+    seen in the smoke test on 2026-11-25), fall back to Flash-Lite once."""
+    primary = env("GEMINI_TEXT_MODEL", "gemini-3.8-flash")
+    fallback = os.environ.get("GEMINI_TEXT_FALLBACK", "gemini-3.8-flash-lite")
+    try:
+        return _gemini_text_once(primary, prompt, stage=stage, shot=shot,
+                                 json_mode=json_mode, temperature=temperature)
+    except ModelCallError as err:
+        if not fallback or fallback == primary or "503" not in str(err):
+            raise
+        print(f"  {primary} overloaded; falling back to {fallback}")
+        return _gemini_text_once(fallback, prompt, stage=stage, shot=shot,
+                                 json_mode=json_mode, temperature=temperature)
+
+
+def _gemini_text_once(model: str, prompt: str, *, stage: str, shot: str | None,
+                      json_mode: bool, temperature: float) -> str:
     key = env("GEMINI_API_KEY")
 
     def once():

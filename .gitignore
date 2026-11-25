@@ -1,8 +1,17 @@
+# secrets
 .env
+# local environment
 .venv/
 __pycache__/
 *.pyc
+.pytest_cache/
 .DS_Store
+# derived files: FFmpeg rebuilds them from committed model outputs (no model calls)
 outputs/tmp/
+outputs/shots/vertical/
+outputs/shots/horizontal/
+outputs/final/mix_*
+*.part
+# Kaggle job packaging (rebuilt by make kaggle-export)
 kaggle/job/
 kaggle/*.zip
