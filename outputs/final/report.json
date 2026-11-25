@@ -1,0 +1,46 @@
+{
+  "title": "The Silent Language of a Mother's Love",
+  "version": 1,
+  "length_s": 84.41,
+  "score_source": "placeholder",
+  "draft": true,
+  "likeness_shown": false,
+  "exports": [
+    {
+      "file": "outputs/final/the_silent_language_of_a_mother_s_love_vertical.mp4",
+      "duration_s": 84.42,
+      "width": 1080,
+      "height": 1920,
+      "fps": "24/1",
+      "lufs": -14.04,
+      "true_peak_db": -1.76,
+      "checks": {
+        "duration_60_90": true,
+        "size": true,
+        "h264": true,
+        "aac_audio": true,
+        "loudness_within_1lu": true,
+        "true_peak_ok": true
+      },
+      "ok": true
+    },
+    {
+      "file": "outputs/final/the_silent_language_of_a_mother_s_love_horizontal.mp4",
+      "duration_s": 84.42,
+      "width": 1920,
+      "height": 1080,
+      "fps": "24/1",
+      "lufs": -14.04,
+      "true_peak_db": -1.76,
+      "checks": {
+        "duration_60_90": true,
+        "size": true,
+        "h264": true,
+        "aac_audio": true,
+        "loudness_within_1lu": true,
+        "true_peak_ok": true
+      },
+      "ok": true
+    }
+  ]
+}
