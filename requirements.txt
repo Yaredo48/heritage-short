@@ -3,3 +3,4 @@ jsonschema==4.26.0
 pillow==12.3.0
 python-dotenv==1.2.3
 pytest==9.2.0
+markdown==3.11.4

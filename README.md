@@ -92,5 +92,6 @@ outputs/          generated references, keyframes, narration, music, shots, fina
 runs.jsonl        one line per model call
 tests/            pytest, offline
 DESIGN.md  ARCHITECTURE.md  EXPERIMENTS.md  FAILURES.md  COSTS.md  ETHICS.md
-docs/             report, walkthrough plan and post draft for submission
+docs/             report draft (`make report` -> PDF/Word), walkthrough plan, post notes, interview prep
+SUBMISSION.md     what each assignment needs, its status, and the remaining steps
 ```
