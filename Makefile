@@ -1,6 +1,6 @@
 # Heritage Short: one command per stage. `make film` runs the whole pipeline.
 PY ?= .venv/bin/python
-RUN = $(PY) run.py
+RUN = "$(PY)" run.py
 
 .PHONY: help setup smoke validate script narration timing radio refs keyframes shots music \
         assemble film shot kaggle-export import costs test clean
@@ -10,7 +10,7 @@ help:            ## list targets
 
 setup:           ## create .venv and install requirements
 	python3 -m venv .venv
-	$(PY) -m pip install -r requirements.txt
+	"$(PY)" -m pip install -r requirements.txt
 
 smoke:           ## call each provider once, log latency
 	$(RUN) smoke
@@ -54,7 +54,7 @@ import:          ## bring Kaggle results back: make import ZIP=~/Downloads/herit
 costs:           ## summarise runs.jsonl into COSTS.md
 	$(RUN) costs
 test:            ## offline tests (no API calls)
-	$(PY) -m pytest -q
+	"$(PY)" -m pytest -q
 
 clean:           ## delete derived files only (model outputs are kept)
 	rm -rf outputs/tmp outputs/shots/vertical outputs/shots/horizontal outputs/final/mix_*
