@@ -38,6 +38,7 @@ The TTS limit is the binding constraint for this film. 9 lines need 9 calls, so 
 | Ken Burns segments, 9 shots × 2 aspect ratios (1080p) | 1 min 42 s wall | `time make shots`, first render |
 | Assembly, both exports | 5 min 25 s – 5 min 33 s wall | two runs of `make assemble`/`make film`; nearly all x264 `-preset medium` at 1080p |
 | `make film` with everything cached | 5 min 26 s | no model calls, only FFmpeg |
+| `make film` on a fresh `git clone`, no `.env` | 7 min 40 s, exit 0 | **0 model calls, 18 cache hits**; segments re-rendered by FFmpeg; both exports verified (25 Nov) |
 | Test suite (`make test`) | 49 s | 23 tests, fake models, real FFmpeg |
 
 ## GPU stages (Kaggle), to fill from runs.jsonl after import
