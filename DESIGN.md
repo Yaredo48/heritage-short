@@ -71,7 +71,36 @@ When the test is run, record one row per person here (relation, where they watch
 **Who:** at least three people from the audience; at least one who did not see the radio cut.
 **Ask:** the same questions, plus: Did the pictures match the words? Did any image feel wrong for our family or for Sheka? Could you read the subtitles?
 
-**Status at submission (26 Nov 2026): not conducted**, for the same reason as test 1. The near-final cut exists (`outputs/final/*_vertical.mp4`, verified in `report.json`), but it has not been shown to viewers.
+**Questionnaires (prepared 26 Nov 2026).** Each of the three participants gets one focus, so that together they cover comprehension, feeling and craft:
+
+*Participant 1: comprehension*
+1. What is the main message you understood from the video?
+2. Was the story easy to understand? (Yes / Partially / No)
+3. Which part of the video was most meaningful to you?
+4. Did the AI-generated visuals communicate the intended message effectively?
+5. Was anything confusing or difficult to understand?
+6. What would you improve?
+7. Overall, how would you rate the video? (Excellent / Very good / Good / Needs improvement)
+
+*Participant 2: emotional engagement*
+1. What emotions did the video create for you?
+2. Did the story feel meaningful and relatable?
+3. Did the narration sound natural?
+4. Did the visuals support the emotional message?
+5. Was there any moment that particularly caught your attention?
+6. Would you recommend this video to someone else? Why?
+7. What is your biggest recommendation for improvement?
+
+*Participant 3: technical quality*
+1. Was the narration clear and understandable?
+2. Were the images and animations visually consistent?
+3. Was the pacing appropriate?
+4. Did the transitions feel natural?
+5. Did you notice any AI-generated visual or audio artifacts?
+6. Was the video technically polished?
+7. What technical improvements would you recommend?
+
+**Status at submission (26 Nov 2026): questionnaires prepared, no answers yet.** The near-final cut exists (`outputs/final/*_vertical.mp4`, verified in `report.json`, without the DRAFT mark since consent was recorded), but no participant has returned answers, so none are recorded here. Under the consent scope (ETHICS.md) the film is shown only to people the author invites, not posted publicly.
 
 ## 6. Automated checks that stand in for some test questions (not audience evidence)
 

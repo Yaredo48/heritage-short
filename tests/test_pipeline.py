@@ -191,6 +191,9 @@ def test_end_to_end_offline(sandbox, board, fake_providers):
     """Fake models, real FFmpeg: both exports exist, 60-90 s, right size,
     with audio, burned subtitles and a passing verification report."""
     board["render"]["sizes"] = {"vertical": [180, 320], "horizontal": [320, 180]}
+    # Pin the consent state so the test does not depend on the committed storyboard:
+    # a script not yet approved exercises the DRAFT-overlay branch of the render.
+    board["consent"].update(script_approved=False, likeness_approved=False)
     for s in board["shots"]:
         narration.generate(board, s)
         keyframes.generate(board, s)

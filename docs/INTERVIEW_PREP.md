@@ -75,6 +75,21 @@ This is the one question the repo cannot answer for you. Know:
 
 If a test did not happen, say so plainly. Do not invent it.
 
+## Your own prepared answers (26 Nov), with accuracy notes
+
+Use each one only if it describes what you actually did.
+
+- **Q1. Why did you choose this project?** "I wanted to explore how generative AI can make creative storytelling more accessible while preserving cultural meaning and personal identity." *(Your motivation: no evidence needed. Tie it to her: the film is for the family, DESIGN.md §1.)*
+- **Q2. What was your biggest technical challenge?** "Multilingual text-to-speech reliability. Transcription accuracy varied across languages: character error rate 0.226 for Amharic and 0.270 for Tigrinya in my tested samples."
+  - **Accurate, with three corrections to say aloud:**
+    - These are single-sentence figures for shot s01. Across all 9 Amharic narration lines the mean is 0.148, or 0.123 once letters that sound the same (ሕ/ህ, ሠ/ሰ) are folded.
+    - The Tigrinya figure is inflated because the *translation* itself contained Cyrillic and Georgian letters. That failure happened before speech.
+    - The transcriber is the same model family, so this is intelligibility to Gemini, not to people (E16).
+  - **Consistency:** the report names a different hardest problem, the narration making the film 92 s under a 10-calls-a-day quota (F05). If asked, say that was the hardest *engineering* problem and multilingual TTS is the hardest *open* one.
+- **Q3. How did you evaluate the system?** "I used automated tests, transcription-based evaluation, and technical validation. I distinguish these measurements from human audience evaluation, which remains pending." *(Accurate: 25 tests; `report.json` checks; E15 and E16; DESIGN.md §4–§6.)*
+- **Q4. What would you improve next?** "I would conduct structured audience testing, improve multilingual narration quality, validate the translation pipeline with native speakers, and strengthen the consent and review process." *(Consistent with report §7 and E16.)*
+- **If asked about consent:** she gave written consent on 26 Nov for the assignment and its *private* evaluation. The film is therefore shared privately, not posted. You kept the no-face version because every image also goes into a public repository (ETHICS.md).
+
 ## Numbers worth knowing
 
 | | |

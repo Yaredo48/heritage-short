@@ -6,7 +6,9 @@ These are the only parts of the project that cannot be done in code: they need y
 
 ---
 
-## 1. Consent from your mother (do this first: the film scores zero without it)
+## 1. Consent from your mother: done (26 Nov 2026, recorded in ETHICS.md)
+
+The steps below are kept for reference, or in case anything changes.
 
 **Send or show her:**
 - `outputs/radio/radio_cut.mp4` (1.9 MB): the narration she would hear.

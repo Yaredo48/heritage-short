@@ -8,6 +8,44 @@ The film is not edited by hand. This repository is a small pipeline that turns o
 make film
 ```
 
+## For assessors: where each criterion is evidenced
+
+| Criterion | Where to look | In one line |
+|---|---|---|
+| **Software engineering and reproducibility** | [`storyboard.json`](storyboard.json) + [`schema/`](schema/storyboard.schema.json) + [`pipeline/validate.py`](pipeline/validate.py); [`pipeline/common.py`](pipeline/common.py); [`runs.jsonl`](runs.jsonl); [`tests/`](tests/); [`.github/workflows/tests.yml`](.github/workflows/tests.yml); [COSTS.md](COSTS.md) "Local compute" | The contract is validated before every stage. Outputs are cached by content hash, so only changed shots regenerate (tested). Retries read the provider's wait hint and fail fast on daily quotas. No secrets are committed (`.env` is ignored). Every model call is logged. **`make film` on a fresh clone: exit 0, 0 model calls, 18 cache hits.** 25 offline tests |
+| **Documentation** | this README, [ARCHITECTURE.md](ARCHITECTURE.md), [PROJECT_TECHNICAL_DOCUMENTATION.pdf](PROJECT_TECHNICAL_DOCUMENTATION.pdf), [docs/technical/SETUP_GUIDE.md](docs/technical/SETUP_GUIDE.md) | Contracts, cache keys and failure handling, with diagrams. The 62-page technical PDF is built from the code (`make techdoc`), so its excerpts match the repository |
+| **Design thinking and audience** | [DESIGN.md](DESIGN.md) | Audience and intent were written before any generation (§1, commit `1b715f8`). Every shot has a stated reason (§3). The user tests were **not run**; this is stated, not hidden (§4–§5, questionnaires prepared). Automated checks are labelled as not audience evidence (§6) |
+| **Experimentation and iteration** | [EXPERIMENTS.md](EXPERIMENTS.md) | 12 experiments run (E01–E10, E15, E16), each hypothesis → one change → measured result → decision. E11–E14 (Kaggle) were not run |
+| **Troubleshooting and persistence** | [FAILURES.md](FAILURES.md) | 11 real blockers (F01–F11): quota, overload, language, consistency, consent risk, tooling. Each says what was tried and what fixed it |
+| **Measurement** | [COSTS.md](COSTS.md) (generated from `runs.jsonl` by `make costs`), [`outputs/final/report.json`](outputs/final/report.json), [`outputs/langtest/summary.json`](outputs/langtest/summary.json) | Latency, failures and cache hits per stage and model; list-price equivalent; free-tier limits found; loudness, ducking, subtitle speed and intelligibility measured. No GPU minutes, because Kaggle was not run; no frontier access |
+| **Consent, labelling and licences** | [ETHICS.md](ETHICS.md) | Written consent recorded 26 Nov 2026 (scope: the assignment and its private evaluation). A consent gate in code (no face, DRAFT mark until approval). Licences of every model and output. Labelling plan (AI end card, metadata, no public posting) |
+
+## Status on 26 Nov 2026
+
+- **Done and verified.**
+  - Both exports are 84.42 s, at 1080×1920 and 1920×1080, H.264/AAC, −14.04 LUFS and −1.76 dBTP, with burned-in English subtitles and an AI end card. There is no DRAFT mark, and all six checks in `report.json` pass.
+  - The Amharic narration is 9 lines in a stock Gemini voice. The keyframes are 9 FLUX.2 klein stills, with the mother shown only from behind or through her hands.
+- **Not done.**
+  - The Kaggle GPU stages: the Wan 2.2 notebook (moving clips) and the ACE-Step notebook (score) are written and checked against the libraries' source (F10), but not run. All shots are therefore slow pan-and-zoom moves over stills, and the music is a temporary FFmpeg pad.
+  - The two audience tests were not run.
+
+## Contributions
+
+- **Author (Yared).**
+  - Chose the story, the subject (his mother) and the audience.
+  - Wrote the story notes and the audience and intent brief before anything was generated (`story/notes.md`, DESIGN.md §1, commit `1b715f8`).
+  - Set the project's constraints: free tools only, a stock voice and never a clone, no face until consent, Kaggle runs uploaded by hand.
+  - Obtained his mother's written consent.
+  - Directed the work through the instructions and decisions recorded here, and ran it with his own API and Kaggle accounts.
+- **Coding agent (Claude Code, Anthropic).**
+  - Wrote the pipeline code, tests, Kaggle notebooks and documentation under the author's direction.
+  - Drafted storyboard v1 from the author's notes (its changelog says so).
+  - Ran the experiments and recorded each experiment and failure.
+  - Commits from `22b22dd` onwards carry a `Co-Authored-By: Claude` trailer. The first four commits (skeleton, design brief, story notes, core library) are recorded under the author's name.
+- **Generative models.** The images (FLUX.2 klein 4B) and the voice (Gemini 3.8 Flash TTS) are AI-generated; see ETHICS.md for licences.
+
+The brief suggests "letting the agent write the stage scripts while you design and review"; this project followed that division of work.
+
 ## What it does
 
 | Stage | Command | Model / tool | Runs on |
@@ -79,7 +117,12 @@ The notebooks save each result as soon as it is made and skip finished ones, so 
 
 ## Consent and labelling
 
-My mother's AI likeness is gated in code. Until her consent is recorded in [ETHICS.md](ETHICS.md) *and* `consent.likeness_approved` is set, shots of her are generated from behind or as hands only. Until she approves the narration (`consent.script_approved`), every export carries a DRAFT mark. The narration uses a stock Gemini voice and her voice is never cloned. The film ends on an AI-disclosure card, and posts are made with the platform's AI label on.
+My mother's AI likeness is gated in code. Her written consent was recorded in [ETHICS.md](ETHICS.md) on 26 Nov 2026, for this assignment and its private evaluation. So:
+- the narration is approved (`consent.script_approved`), and the exports carry no DRAFT mark;
+- the film keeps its no-face version (`consent.likeness_approved` stays false), because every image in this public repository would otherwise show an AI face representing her;
+- the film is shared privately with the assessors, not posted publicly.
+
+The narration uses a stock Gemini voice; her voice is never cloned. The film ends on an AI-disclosure card.
 
 ## Repository
 

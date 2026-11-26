@@ -9,12 +9,13 @@
     "v1: the slow voice style made the narration 77 s and the film 92 s (over 90). A 'calm natural pace' retake was 12% shorter on 3 lines before the TTS free tier (10 requests/day) ran out. Kept the original take and capped pauses inside each line at 0.45 s in code instead: 77.4 s -> 67.9 s, no extra model calls (EXPERIMENTS.md E02-E04).",
     "v1: s04 no_face_prompt rewritten: 'from behind and slightly to the side' still showed her profile and had her pouring coffee into a cooking pot (EXPERIMENTS.md E05).",
     "v1: style reference sheet generated (4 seeds, chose 201: the most jebena-like pot). Conditioning keyframes on it was tested on s02 and s05 and made them worse (FLUX.2 klein pasted the table and pot into the forest, lost the dress), so use_style_reference stays false (EXPERIMENTS.md E07).",
-    "v1: mix gets a -10 dBFS pre-limiter and a -1.5 dBTP loudnorm ceiling: AAC export measured -14.04 LUFS / -1.76 dBTP, where -1 dBTP alone gave -0.77 dBTP after AAC and -1.5 alone gave -15.03 LUFS (EXPERIMENTS.md E09)."
+    "v1: mix gets a -10 dBFS pre-limiter and a -1.5 dBTP loudnorm ceiling: AAC export measured -14.04 LUFS / -1.76 dBTP, where -1 dBTP alone gave -0.77 dBTP after AAC and -1.5 alone gave -15.03 LUFS (EXPERIMENTS.md E09).",
+    "v1: consent recorded 26 Nov 2026 (ETHICS.md). script_approved -> true, which removes the DRAFT mark. likeness_approved stays false by choice (public repository; consent covers private evaluation only). No prompt, narration or timing changed."
   ],
   "consent": {
     "likeness_approved": false,
-    "script_approved": false,
-    "note": "Both false until recorded in ETHICS.md. While likeness_approved is false, character shots use no_face_prompt and the character reference sheet is not generated. While script_approved is false, every export carries a DRAFT mark."
+    "script_approved": true,
+    "note": "Consent recorded in ETHICS.md on 26 Nov 2026 (written statement; scope: the assignment and its private evaluation). script_approved is true. likeness_approved stays false by choice: generated images are committed to a public repository, so the no-face version keeps her unidentifiable there."
   },
   "style": {
     "style_block": "warm cinematic film still, documentary realism, soft natural golden light, gentle film grain, muted earthy palette of coffee brown, forest green and cream, shallow depth of field, subject centred in the frame, no text, no letters",

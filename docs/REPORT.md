@@ -6,7 +6,7 @@
 |---|---|
 | Repository | https://github.com/Yaredo48/heritage-short |
 | One command | `make setup && make film` (README.md, "Install" and "Run it") |
-| Film, walkthrough, post | Submitted with assignment 2. The film is shared privately with the graders, not published, because consent is still pending (ETHICS.md, SUBMISSION.md) |
+| Film, walkthrough, post | Submitted with assignment 2. The film is shared privately with the graders and not posted publicly, because my mother's consent (26 Nov) covers the assignment and its private evaluation only (ETHICS.md) |
 
 
 ---
@@ -39,7 +39,9 @@ Every model output is cached by a hash of its inputs, retries follow the provide
 
 **The honest answer: the two audience tests were not run before the deadline.** The radio cut (`outputs/radio/radio_cut.mp4`), the near-final cut, the five test questions and ready-to-send messages are all prepared (DESIGN.md §4–§5, `docs/FAMILY_KIT.md`), but no family member has watched either cut yet. I am not reporting reactions I do not have. As a result:
 - no change in `storyboard.json` is attributed to audience feedback (it is still version 1);
-- the film is not published, because the same family conversation is also where my mother's consent comes from (ETHICS.md).
+- three questionnaires (comprehension, emotional engagement, technical quality) are prepared in DESIGN.md §5 but have no answers yet.
+
+My mother's written consent was recorded on 26 Nov (ETHICS.md). It covers the assignment and its private evaluation, so the film is shared privately, not posted publicly.
 
 **What I did instead, clearly labelled as not audience evidence** (DESIGN.md §6): I answered by measurement the test questions a machine can answer.
 - *Could you read the subtitles?* At most 13.8 characters per second, with the shortest cue 3.3 s (E15).
@@ -97,7 +99,8 @@ The brief judges this part on insight, not volume. Each item below exists in the
 - **A consent gate in code, not only in a document.**
   - While `consent.likeness_approved` is false, shots that show her use a no-face prompt, no character sheet is ever generated, and the Wan prompts ask for her face to stay hidden. The Wan notebook also leaves her shots out by default, because image-to-video could turn her face to the camera.
   - The validator refuses to set the flag to true while ETHICS.md still says *Pending*.
-  - Until the script is approved, both exports carry a DRAFT mark.
+  - Until the script is approved, both exports carry a DRAFT mark. She gave written consent on 26 Nov, so the flag is now on and the mark is gone; the change is one line in the storyboard and a validated record in ETHICS.md.
+  - Her consent would also allow an AI face. I kept the no-face version on purpose: every generated image is committed to a public repository, and her consent covers private evaluation only.
   - It is tested, and each time the gate applies it writes a `consent_gate` line to `runs.jsonl` (6 so far).
   - One "no face" prompt still showed her profile, which is why I now check every character keyframe by eye (E05, F07).
 - **Measured audio and subtitles, not only listened to or watched** (E09, E10, E15).

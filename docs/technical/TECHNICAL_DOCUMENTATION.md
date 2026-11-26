@@ -8,7 +8,7 @@
     ["Repository", "github.com/Yaredo48/heritage-short (branch <code>main</code>)"],
     ["Document version", "1.0, 26 November 2026"],
     ["Code baseline", "commit <code>5617003</code> plus this documentation commit"],
-    ["Pipeline state", "Draft film built and verified (84.42 s, both aspect ratios). Kaggle GPU stages implemented but not yet run; consent pending."],
+    ["Pipeline state", "Film built and verified (84.42 s, both aspect ratios), no DRAFT mark. Consent recorded 26 Nov (private evaluation). Kaggle GPU stages implemented but not yet run; audience tests not run."],
     ["Audience", "Developers and technical reviewers who want to understand, reproduce or extend the pipeline"]
   ],
   "note": "Every code excerpt in this document is extracted from the repository at build time by <code>docs/technical/build_pdf.py</code>, with its file name and line numbers. Measurements are taken from <code>runs.jsonl</code>, <code>outputs/final/report.json</code> and test runs; anything not yet executed is marked as such."
@@ -76,7 +76,12 @@ Table: What is in scope, and its state at the time of writing (26 Nov 2026).
 | Language intelligibility test by ASR round trip (`make langtest`, E16) | Implemented, executed: 9 Amharic lines + 4 languages |
 | Graphical user interface | Out of scope: the pipeline is a command-line tool |
 
-Outside the code, two further limits apply: consent for the mother's likeness is still *Pending* in ETHICS.md, and the two audience tests have not yet been recorded in DESIGN.md. Chapter 11 lists all limitations.
+Outside the code, two facts shape the release:
+
+- The mother's written consent was recorded on 26 November. It covers the assignment and its private evaluation only, so the film is shared privately and the no-face version is kept.
+- The two audience tests were not run before the deadline; DESIGN.md says so.
+
+Chapter 11 lists all limitations.
 
 ## Expected outcomes
 
@@ -85,7 +90,7 @@ Outside the code, two further limits apply: consent for the mother's likeness is
 - A complete `runs.jsonl` from which latency and list-price cost are computed (COSTS.md).
 - A repository a stranger can clone and rebuild with `make film`.
 
-The current draft meets these targets except for the elements still pending: the Kaggle stages, consent, and audience tests. Both exports measure **84.42 s, −14.04 LUFS integrated loudness and −1.76 dBTP true peak**, and pass all six checks (Section 9.5).
+The current film meets these targets except for the elements still pending: the Kaggle stages (score and moving shots) and the audience tests. Both exports measure **84.42 s, −14.04 LUFS integrated loudness and −1.76 dBTP true peak**, and pass all six checks (Section 9.5).
 
 ## Overview of the pipeline
 
@@ -196,7 +201,7 @@ Table: The whole stack by layer.
 | Media processing | FFmpeg/ffprobe, Pillow, a pure-Python pause compressor |
 | Observability | `runs.jsonl` (append-only JSON Lines), `make costs` |
 | GPU work | Kaggle notebooks (diffusers Wan 2.2, ACE-Step 1.5) bridged by `kaggle_io.py` |
-| Quality gates | pytest (25 tests), `assemble.verify` → `report.json` |
+| Quality gates | pytest (25 tests), `assemble.verify` → `report.json`, GitHub Actions workflow `.github/workflows/tests.yml` (validate, timing, tests on a clean Ubuntu runner) |
 | Secrets | `.env` loaded by python-dotenv; git-ignored |
 
 # System Architecture
@@ -1011,7 +1016,7 @@ Table: The current verification report (`outputs/final/report.json`).
 | vertical | 1080×1920 | 84.42 s | 24 | −14.04 LUFS | −1.76 dBTP | 6 / 6 pass |
 | horizontal | 1920×1080 | 84.42 s | 24 | −14.04 LUFS | −1.76 dBTP | 6 / 6 pass |
 
-The report also records `"score_source": "placeholder"`, `"draft": true` and `"likeness_shown": false`. These three flags make the release state explicit.
+The report also records `"score_source": "placeholder"`, `"draft"` and `"likeness_shown": false`. `"draft"` was `true` until consent was recorded on 26 November; it has been `false` since. These three flags make the release state explicit.
 
 # Installation and Execution Guide
 
@@ -1370,7 +1375,7 @@ Table: Limitations at the time of writing.
 |---|---|
 | Moving shots | All 9 shots are Ken Burns over stills; no Wan 2.2 clip has been generated because the notebook has not been run |
 | Music | The score is the FFmpeg placeholder pad; no ACE-Step candidate exists yet, so `music.chosen_seed` is null |
-| Consent | Likeness consent and script approval are pending; exports carry a DRAFT mark and must not be published |
+| Consent | Recorded 26 Nov for the assignment and its private evaluation only: the film is shared privately, not published, and the no-face version is kept because the repository is public |
 | Character consistency | No character reference sheet (consent-gated); the mother is shown only from behind or through her hands |
 | Audience | The two required audience tests (radio cut, near-final cut) were not run; DESIGN.md states this, and §6 lists automated checks that are explicitly not audience evidence |
 | Language quality | Measured by ASR round trip only (E16: Amharic mean CER 0.123 with homophones folded, four flagged words); not yet reviewed by native listeners. TTS has no seed, so takes are not reproducible |

@@ -53,7 +53,7 @@ def check(board: dict) -> tuple[list[str], list[str]]:
         errors.append("consent.likeness_approved is true but ETHICS.md still marks consent "
                       "as Pending; record how and when consent was given first")
     if not board["consent"]["likeness_approved"] and any(s["character"] for s in board["shots"]):
-        warnings.append("likeness consent not recorded: character shots use their no_face_prompt")
+        warnings.append("likeness_approved is false: character shots use their no_face_prompt (no face is generated)")
     if not board["consent"]["script_approved"]:
         warnings.append("script not approved yet: exports will carry a DRAFT mark")
     return errors, warnings
