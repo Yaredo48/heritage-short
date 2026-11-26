@@ -10,7 +10,7 @@
 | Walkthrough | ✍️ _link_ |
 | Public post | ✍️ _link_ |
 
-> **Before you export this file:** replace every ✍️ with your own words and real events, delete this box, then run `make report`. That writes `docs/REPORT.pdf` and `docs/REPORT.docx`. Everything not marked ✍️ is backed by a file named in brackets. Check each one, and change anything you would not say yourself. The interviewer will ask about it.
+> **Before you export this file:** the only ✍️ left are things that must come from you: links, what your family said, and your own instinct. Replace each one with real words and events, delete this box, then run `make report`. That writes `docs/REPORT.pdf` and `docs/REPORT.docx`. Everything not marked ✍️ is backed by a file named in brackets. Check each one, and change anything you would not say yourself. The interviewer will ask about it.
 
 ---
 
@@ -59,7 +59,7 @@ Every model output is cached by a hash of its inputs, retries follow the provide
 
 ## 3. The hardest problem, and how I solved it
 
-**The narration did not fit the film, and the free TTS quota made retakes almost impossible.** ✍️ _Confirm this was the hardest for you, or replace it._
+**The narration did not fit the film, and the free TTS quota made retakes almost impossible.**
 
 1. **The problem.** The first full Amharic take was 77.4 s of speech, which made the film 92.2 s, over the 90-second limit (`make timing`; FAILURES.md F05). The cause was my style instruction, "gentle pauses between phrases". The model put 0.5–1.1 s of silence between phrases; in shot s02 alone there were four pauses of 0.63–1.13 s.
 2. **The obvious fix ran into the quota.** I tried a retake with a faster style, but the Gemini TTS free tier allows 3 requests per minute and about 10 per day, and nine lines need nine calls. The retake stopped after 3 lines. Those 3 lines were only 12 % shorter overall, and one (s03) came out *longer*, so the voice style is not a reliable control (E02, F03, F04).
@@ -94,32 +94,45 @@ The log is the evidence behind most of this report:
   - In s05, the cream-and-green dress and the oil lamp disappeared, and a child's face appeared that was not in the prompt.
 - **What I did instead.** I set `use_style_reference: false`. A shared text style block appended to every prompt kept the look consistent across the nine shots.
 
-**What I take from it:** a practice that works with one model can fail with another, and the only way to know is a side-by-side comparison with the seed fixed. ✍️ _Add your own view._ The character reference sheet is still untested, because it would show her face and consent is pending.
+**What I take from it:** a practice that works with one model can fail with another, and the only way to know is a side-by-side comparison with the seed fixed. The suggestion assumes a model that borrows style from a reference; FLUX.2 klein instead edits whatever image it is given. The character reference sheet is still untested, because it would show her face and consent is pending.
 
-## 6. Beyond the floor ✍️
+## 6. Beyond the floor
 
-> The brief judges this on insight, not volume. Keep what is true, and add any extra work you do before submitting.
+The brief judges this part on insight, not volume. Each item below exists in the repository and was measured or tested.
 
 - **A consent gate in code, not only in a document.**
-  - While `consent.likeness_approved` is false, shots that show her use a no-face prompt, no character sheet is ever generated, and the Wan prompts ask for her face to stay hidden.
+  - While `consent.likeness_approved` is false, shots that show her use a no-face prompt, no character sheet is ever generated, and the Wan prompts ask for her face to stay hidden. The Wan notebook also leaves her shots out by default, because image-to-video could turn her face to the camera.
   - The validator refuses to set the flag to true while ETHICS.md still says *Pending*.
   - Until the script is approved, both exports carry a DRAFT mark.
   - It is tested, and each time the gate applies it writes a `consent_gate` line to `runs.jsonl` (6 so far).
   - One "no face" prompt still showed her profile, which is why I now check every character keyframe by eye (E05, F07).
-- **Measured audio, not only listened to** (E09, E10).
+- **Measured audio and subtitles, not only listened to or watched** (E09, E10, E15).
   - Ducking: the music drops by 13 dB under speech and is unchanged in the pauses.
   - Loudness: the target holds after AAC encoding, at −14.04 LUFS and −1.76 dBTP.
-- **Amharic and the image model** (E01, E06). The model does not know "jebena" and drew a vase, so objects are described by their shape. ✍️ _If you collect your listeners' pronunciation notes (DESIGN.md §4, last column), add here exactly which words the Amharic TTS got wrong. That is the "extra language tested, document where it fails" direction from the brief._
-- **An offline end-to-end test.** Fake models and real FFmpeg build both exports, then check they are 60–90 s long, the right size, and have audio and subtitles (`tests/`, 23 tests).
-- ✍️ _Anything else you finish, e.g. a blind preference test of a Wan clip against the pan-and-zoom shot (EXPERIMENTS.md E12)._
+  - Subtitle reading speed: at most 13.8 characters per second, with the shortest cue 3.3 s on screen, well inside common guidance for adult viewers. A test now keeps it that way (`test_subtitle_reading_speed`).
+- **Reading the dependency's source before spending GPU quota** (F10). The Kaggle notebooks had never run, so before the first run I checked them against the diffusers 0.43.0 and ACE-Step 1.5 source. That found three defects a first run would have hit:
+  - ACE-Step silently ignored the seeds, because `use_random_seed` defaults to true, so the three candidates could never have been reproduced.
+  - Its load failures return a flag instead of raising, so a failed load would have gone unnoticed.
+  - Its `pip` install cannot resolve its `uv`-only dependencies.
+  
+  It also confirmed that Wan 2.2 TI2V-5B image-to-video is supported through `expand_timesteps`.
+- **Amharic and the image model** (E01, E06). The model does not know "jebena" and drew a vase, so cultural objects are described by their shape. ✍️ _Optional: if your listeners noted mispronounced Amharic words in the user tests (DESIGN.md §4, last column), list them here. That is the brief's "extra language tested, document where it fails" direction._
+- **A tool others can follow.**
+  - An offline end-to-end test builds both exports with fake models and real FFmpeg (`tests/`, 24 tests).
+  - A 61-page technical document is built from the code itself, so its excerpts cannot drift from the implementation (`make techdoc`, `PROJECT_TECHNICAL_DOCUMENTATION.pdf`).
 
-## 7. What I would build next ✍️
+## 7. What I would build next
 
-> Choose one or two and say why. Ideas that follow from this project:
+1. **Choose the Amharic voice by ear, not by length.**
+   - Make several TTS takes per line and have Amharic speakers compare them blind.
+   - Pin the chosen take in the storyboard.
+   - Why: E02 showed that the voice style instruction does not reliably control pace, and TTS has no seed, so today one take per line is luck.
+2. **Detect faces in generated images automatically.**
+   - Run a face detector over every character keyframe and Wan clip, and fail the stage if a face is visible while likeness consent is missing.
+   - Why: E05 and F07 showed that a "no face" prompt is not a guarantee, and an eye check does not scale.
+3. **Then, with consent, character consistency.** Make a character sheet, possibly train a small LoRA on it, and measure whether she stays recognisably the same person across shots.
 
-- Several TTS takes per line, compared blind by Amharic speakers, so the voice is chosen by ear rather than by length.
-- A small LoRA trained on a character sheet once she consents, then a measurement of whether her likeness stays more consistent across shots.
-- A simple form where a relative who does not code tells their own story and gets a `storyboard.json`, then a film, back.
+✍️ _Optional: say in one sentence which of these you would do first and why, in your own words._
 
 ---
 
@@ -133,8 +146,9 @@ The log is the evidence behind most of this report:
 | Only what changed regenerates | `cache_hit` vs `model_call` lines in `runs.jsonl`; `tests/test_pipeline.py` (cache tests) |
 | Retries and quota handling | `pipeline/common.py`; FAILURES.md F02–F04 |
 | One command from a clean clone | COSTS.md, "Local compute" (fresh clone, exit 0, 0 model calls) |
-| Ten experiments, each with a hypothesis | EXPERIMENTS.md E01–E10 |
-| Real blockers and fixes | FAILURES.md F01–F09 |
+| Experiments, each with a hypothesis | EXPERIMENTS.md E01–E10 and E15 (E11–E14 are the Kaggle runs) |
+| Real blockers and fixes | FAILURES.md F01–F10 |
 | Latency, cost and free-tier limits | COSTS.md (generated from `runs.jsonl`) |
 | Consent, licences, labelling | ETHICS.md; `consent` block in `storyboard.json` |
 | Both exports verified | `outputs/final/report.json` (duration, size, codecs, LUFS, true peak) |
+| Full technical documentation | `PROJECT_TECHNICAL_DOCUMENTATION.pdf` (source in `docs/technical/`) |

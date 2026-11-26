@@ -81,5 +81,5 @@ If a test did not happen, say so plainly. Do not invent it.
 | TTS free tier | 3 requests/min, about 10/day; 13 calls succeeded on 25 Nov |
 | Keyframes | FLUX.2 klein 4B, about 10 s per image; about 104 neurons per 1024² image, about 95 images/day free |
 | Fresh clone | `make film`: exit 0, 7 min 40 s, 0 model calls, 18 cache hits |
-| Tests | 23, offline, about 49 s |
+| Tests | 24, offline, about 50 s |
 | Cost | USD 0 actual. List-price equivalent for the keyframes is about USD 0.02 (COSTS.md) |

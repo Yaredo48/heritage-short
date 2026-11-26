@@ -145,6 +145,18 @@ def test_subtitle_cues_fit_the_frame(board, sandbox, fake_providers):
             assert end > start
 
 
+def test_subtitle_reading_speed(board):
+    """EXPERIMENTS.md E15: with the real (committed) narration, every cue is readable
+    on a phone: at most 17 characters per second and at least 1 s on screen."""
+    if not all(narration.narration_path(board, s).exists() for s in board["shots"]):
+        pytest.skip("real narration not generated for the current storyboard")
+    rows = narration.timeline(board)
+    for width in assemble.CHARS_PER_LINE.values():
+        for start, end, lines in assemble.cues(board, rows, width):
+            assert end - start >= 1.0
+            assert len(" ".join(lines)) / (end - start) <= 17
+
+
 # ---------- Kaggle bridge ----------
 
 def test_kaggle_import_places_files_and_merges_log_once(sandbox):

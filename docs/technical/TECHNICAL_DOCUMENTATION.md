@@ -195,7 +195,7 @@ Table: The whole stack by layer.
 | Media processing | FFmpeg/ffprobe, Pillow, a pure-Python pause compressor |
 | Observability | `runs.jsonl` (append-only JSON Lines), `make costs` |
 | GPU work | Kaggle notebooks (diffusers Wan 2.2, ACE-Step 1.5) bridged by `kaggle_io.py` |
-| Quality gates | pytest (23 tests), `assemble.verify` → `report.json` |
+| Quality gates | pytest (24 tests), `assemble.verify` → `report.json` |
 | Secrets | `.env` loaded by python-dotenv; git-ignored |
 
 # System Architecture
@@ -477,6 +477,7 @@ Table: Failures met during the build, and their fixes.
 | F07 | "No face" prompt still showed a profile | "Directly behind, her back to the camera"; manual check of every character keyframe |
 | F08 | Style reference made keyframes worse | `use_style_reference: false` |
 | F09 | `aevalsrc` comma parsing; `ass=` filter and paths with spaces; orphan subtitle word | Quoted expression; run FFmpeg with `cwd`; balanced wrapping |
+| F10 | Kaggle notebooks, checked against library source before the first GPU run: ACE-Step ignored seeds, init failures did not raise, `pip install -e` cannot resolve its deps | `use_random_seed=False`; check the `ok` flag; official `uv sync`; Wan pinned to diffusers 0.43.0 with `expand_timesteps=True` |
 
 ## Final execution
 
@@ -1172,7 +1173,7 @@ The suite follows three rules:
 
 ## Implemented tests
 
-Table: The 23 tests (`tests/test_storyboard.py`: 10 including 2 parametrised cases; `tests/test_pipeline.py`: 13).
+Table: The 24 tests (`tests/test_storyboard.py`: 10 including 2 parametrised cases; `tests/test_pipeline.py`: 14).
 
 | Test | Verifies | Expected result |
 |---|---|---|
@@ -1196,6 +1197,7 @@ Table: The 23 tests (`tests/test_storyboard.py`: 10 including 2 parametrised cas
 | `test_character_sheet_skipped_without_consent` | `make_refs` without consent | no character-sheet prompt sent |
 | `test_compress_pauses_shortens_long_silence` | A 1.2 s gap capped at 0.4 s | 0.8 s removed; 2.2 s output (±0.06) |
 | `test_subtitle_cues_fit_the_frame` | Every cue, every aspect | 1–2 lines, within width, end > start |
+| `test_subtitle_reading_speed` | With the real committed narration, every cue (E15) | ≤ 17 characters/s and ≥ 1 s on screen |
 | `test_kaggle_import_places_files_and_merges_log_once` | Import twice | files in place; one Kaggle log line |
 | `test_end_to_end_offline` | Whole film at small sizes (180×320, 320×180) | both exports pass verification, 60–90 s, video + audio streams, SRT and ASS written, `mix` logged |
 
@@ -1223,7 +1225,7 @@ tests/test_storyboard.py::test_render_limits[bad1] PASSED
 ============================= 23 passed in 57.67s ==============================
 ```
 
-An earlier run, on 25 November, also passed all 23 tests (49 s).
+An earlier run, on 25 November, also passed all 23 tests (49 s). After `test_subtitle_reading_speed` was added (E15), the suite was run again on 26 November at about 17:45 EAT: **24 passed in 47.82 s**.
 
 ## Input validation and runtime verification
 
@@ -1438,7 +1440,7 @@ Every model output is cached under a hash of its inputs; every call is retried s
 - **Resilience:** quota-aware retries that read the provider's own wait hint and fail fast on daily limits; fallbacks at every GPU-dependent step.
 - **Measured quality:** −14.04 LUFS and −1.76 dBTP on both exports; music ducked by 13 dB under speech; six automatic output checks.
 - **Ethics in code:** the likeness gate, script-approval watermark and AI disclosure are enforced by the pipeline, not left to memory.
-- **Evidence:** 130 log lines, 10 recorded experiments, 9 documented failures and 23 passing tests.
+- **Evidence:** more than 130 log lines, 11 recorded experiments, 10 documented failures and 24 passing tests.
 
 ## What the project demonstrates technically
 
