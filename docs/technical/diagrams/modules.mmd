@@ -1,0 +1,41 @@
+flowchart TD
+  classDef core fill:#fff6d8,stroke:#b08a2e,color:#3a2e0e
+  RUN["run.py"] -->|importlib| ST
+  subgraph ST["stage modules"]
+    direction LR
+    smoke["smoke"]
+    script["script"]
+    narration["narration"]
+    keyframes["keyframes"]
+    shots["shots"]
+    music["music"]
+    assemble["assemble"]
+    radio["radio"]
+    kaggle_io["kaggle_io"]
+    costs["costs"]
+  end
+  shots --> keyframes
+  shots --> narration
+  assemble --> music
+  assemble --> narration
+  assemble --> shots
+  radio --> assemble
+  radio --> narration
+  kaggle_io --> keyframes
+  narration --> audio["audio"]
+  narration --> providers["providers"]
+  keyframes --> providers
+  script --> providers
+  smoke --> providers
+  narration --> validate["validate"]
+  keyframes --> validate
+  shots --> validate
+  music --> validate
+  assemble --> validate
+  radio --> validate
+  kaggle_io --> validate
+  script --> validate
+  providers --> common["common"]
+  validate --> common
+  costs --> common
+  class common,validate,providers core

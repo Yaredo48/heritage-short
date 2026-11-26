@@ -1,0 +1,33 @@
+flowchart TB
+  classDef src fill:#eef1f7,stroke:#5a6b8c,color:#1d2433
+  classDef art fill:#f4ede3,stroke:#7a5c3e,color:#2b211a
+  classDef fin fill:#e6efe6,stroke:#4d7a4d,color:#1f331f
+
+  NOTES["story/notes.md · DESIGN.md"] -. "script stage (optional, not yet run)" .-> SB
+  SB["storyboard.json<br/>shots[] · style · voice · music · render · mix · consent"]
+  ENV[".env: API keys (never logged)"]
+
+  SB -- "narration.am · voice" --> RAW["narration/raw/sNN_key.wav<br/>24 kHz mono 16-bit (model output)"]
+  ENV --> RAW
+  RAW -- "voice.max_pause_s" --> PROC["narration/sNN_key_p450.wav<br/>pauses capped"]
+  SB -- "image_prompt | no_face_prompt · seed · style" --> KF["keyframes/sNN_key.png<br/>1024 × 1024"]
+  ENV --> KF
+  PROC -- "durations" --> TL["timeline rows (in memory)<br/>id · start · dur · narr_s"]
+  SB -- "duration_s · lead_in_s" --> TL
+  KF --> SEG["shots/aspect/sNN_key.mp4<br/>dur + transition_s"]
+  TL --> SEG
+  SB -- "music block" --> SC["music/placeholder_key.wav<br/>or score_seedN_key.wav (−20 LUFS)"]
+  PROC --> MIX["final/mix_key.wav + .json<br/>−14 LUFS"]
+  SC --> MIX
+  TL --> MIX
+  SB -- "narration.en" --> SUB["tmp/subs_aspect.ass<br/>endcard + draft PNGs"]
+  TL --> SUB
+  SEG --> MP4["final/*_vertical.mp4<br/>final/*_horizontal.mp4"]
+  MIX --> MP4
+  SUB --> MP4
+  TL --> SRT["final/subtitles_en.srt"]
+  MP4 --> REP["final/report.json"]
+
+  class NOTES,SB,ENV src
+  class RAW,PROC,KF,TL,SEG,SC,MIX,SUB art
+  class MP4,SRT,REP fin

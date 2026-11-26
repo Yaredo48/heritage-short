@@ -1,0 +1,23 @@
+flowchart TB
+  classDef src fill:#eef1f7,stroke:#5a6b8c,color:#1d2433
+  classDef f fill:#f4ede3,stroke:#7a5c3e,color:#2b211a
+  classDef o fill:#e6efe6,stroke:#4d7a4d,color:#1f331f
+  classDef dec fill:#fff6d8,stroke:#b08a2e,color:#3a2e0e
+  subgraph P["Picture chain (filter_complex)"]
+    direction LR
+    S["9 segments<br/>(dur + 0.5 s each)"] --> NORM["settb · fps · scale<br/>setsar · yuv420p"]
+    EC["end card PNG<br/>(Pillow, 3.5 s)"] --> NORM
+    NORM --> XF["xfade chain<br/>0.5 s at each cumulative offset"] --> FD["fade in 0.8 s<br/>fade out last 1 s"] --> ASS["ass filter<br/>burn in subs_&lt;aspect&gt;.ass"]
+  end
+  subgraph E["Draft mark, encode, verify"]
+    direction LR
+    D{"script_approved?"} -->|no| OV["overlay DRAFT mark<br/>(RGBA PNG)"] --> ENC["libx264 CRF 20 · AAC 192k<br/>+faststart · AI comment metadata"]
+    D -->|yes| ENC
+    MIXW["mix_&lt;key&gt;.wav"] --> ENC
+    ENC --> MP4["*_&lt;aspect&gt;.mp4"] --> VER["verify() → report.json"]
+  end
+  ASS --> D
+  class S,EC,MIXW src
+  class NORM,XF,FD,ASS,OV,ENC f
+  class MP4,VER o
+  class D dec

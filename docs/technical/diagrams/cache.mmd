@@ -1,0 +1,12 @@
+flowchart TB
+  classDef dec fill:#fff6d8,stroke:#b08a2e,color:#3a2e0e
+  classDef model fill:#e6efe6,stroke:#4d7a4d,color:#1f331f
+  A["collect every input that affects the output"] --> B["canonical_hash(): JSON with sorted keys → SHA-256"]
+  B --> C["cache_path(): outputs/&lt;stage&gt;/&lt;id&gt;_&lt;key[:12]&gt;.&lt;ext&gt;"]
+  C --> D{"file exists and not --force?"}
+  D -->|yes| E["log_event('cache_hit')<br/>return existing path"]
+  D -->|no| F["call the model through call_with_retries()"]
+  F --> G["write_atomic(): write &lt;name&gt;.part, then rename"]
+  G --> H["return new path"]
+  class D dec
+  class F model

@@ -1,0 +1,15 @@
+flowchart TD
+  classDef dec fill:#fff6d8,stroke:#b08a2e,color:#3a2e0e
+  classDef stop fill:#f7e1dd,stroke:#a3473a,color:#3d1610
+  classDef ok fill:#e6efe6,stroke:#4d7a4d,color:#1f331f
+  A{"consent.likeness_approved?"} -->|false| B["character shots: no_face_prompt<br/>no character_block · no character sheet (consent_gate logged)<br/>Wan prompts get HIDE_FACE suffix"]
+  A -->|true| C{"ETHICS.md row for 'mother'<br/>still says Pending?"}
+  C -->|yes| X(["validation error: record consent first"])
+  C -->|no| D["image_prompt + character_block<br/>+ chosen character reference image"]
+  B --> E{"consent.script_approved?"}
+  D --> E
+  E -->|false| F["exports carry 'DRAFT – pending family approval'<br/>report.json draft = true"]
+  E -->|true| G(["clean exports, ready to publish"])
+  class A,C,E dec
+  class X stop
+  class G ok

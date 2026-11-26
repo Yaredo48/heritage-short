@@ -19,7 +19,7 @@ make film
 | 3 · music | `make music` | ACE-Step 1.5 candidates, else a temp pad | Kaggle T4 (notebook) / laptop |
 | 5 · assembly | `make assemble` | FFmpeg: crossfades, ducking, subtitles, loudness, end card, both aspect ratios | laptop |
 
-Every stage validates the storyboard first, skips work whose inputs have not changed, and appends one line per model call to [`runs.jsonl`](runs.jsonl). How the stages fit together, the cache keys and the failure handling are in [ARCHITECTURE.md](ARCHITECTURE.md). Measured time and cost are in [COSTS.md](COSTS.md).
+Every stage validates the storyboard first, skips work whose inputs have not changed, and appends one line per model call to [`runs.jsonl`](runs.jsonl). How the stages fit together, the cache keys and the failure handling are in [ARCHITECTURE.md](ARCHITECTURE.md). Measured time and cost are in [COSTS.md](COSTS.md). The complete technical documentation, with architecture and pipeline diagrams, is [PROJECT_TECHNICAL_DOCUMENTATION.pdf](PROJECT_TECHNICAL_DOCUMENTATION.pdf); a short install guide is [docs/technical/SETUP_GUIDE.md](docs/technical/SETUP_GUIDE.md).
 
 ## Install
 
@@ -94,4 +94,5 @@ tests/            pytest, offline
 DESIGN.md  ARCHITECTURE.md  EXPERIMENTS.md  FAILURES.md  COSTS.md  ETHICS.md
 docs/             report draft (`make report` -> PDF/Word), walkthrough plan, post notes, interview prep
 SUBMISSION.md     what each assignment needs, its status, and the remaining steps
+PROJECT_TECHNICAL_DOCUMENTATION.pdf   full technical documentation (source: docs/technical/, `make techdoc`)
 ```

@@ -3,7 +3,7 @@
   1. timeline from the narration (narration.timeline)
   2. audio: each narration line placed at its shot's start + lead-in, the score
      looped/trimmed under it, ducked with sidechaincompress, then a two-pass
-     loudnorm to -14 LUFS / -1 dBTP
+     loudnorm to mix.target_lufs / mix.true_peak_db (-14 LUFS / -1.5 dBTP)
   3. picture: shot segments joined with crossfades, fade in/out, an AI
      disclosure end card, burned-in English subtitles, and a DRAFT mark while
      the script is not approved

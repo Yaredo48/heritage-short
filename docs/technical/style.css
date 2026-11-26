@@ -1,0 +1,113 @@
+/* Print stylesheet for PROJECT_TECHNICAL_DOCUMENTATION.pdf (headless Chrome, CSS paged media). */
+:root {
+  --ink: #221a14;
+  --muted: #6b5d50;
+  --accent: #7a4a24;
+  --accent-soft: #f4ede3;
+  --rule: #d9cbb8;
+  --code-bg: #f7f5f1;
+  --code-border: #e3dccf;
+}
+
+@page {
+  size: A4;
+  margin: 21mm 17mm 19mm 17mm;
+  @top-left { content: "The Silent Language of a Mother's Love"; font: 7.5pt "Noto Sans", sans-serif; color: #8a7a6a; vertical-align: bottom; padding-bottom: 3mm; }
+  @top-right { content: "Technical Documentation · v1.0"; font: 7.5pt "Noto Sans", sans-serif; color: #8a7a6a; vertical-align: bottom; padding-bottom: 3mm; }
+  @bottom-left { content: "Heritage Short pipeline · github.com/Yaredo48/heritage-short"; font: 7.5pt "Noto Sans", sans-serif; color: #8a7a6a; vertical-align: top; padding-top: 3mm; }
+  @bottom-right { content: "Page " counter(page) " of " counter(pages); font: 7.5pt "Noto Sans", sans-serif; color: #8a7a6a; vertical-align: top; padding-top: 3mm; }
+}
+@page :first {
+  margin: 0;
+  @top-left { content: none; } @top-right { content: none; }
+  @bottom-left { content: none; } @bottom-right { content: none; }
+}
+@page landscape { size: A4 landscape; margin: 13mm 12mm 12mm 12mm; }
+
+html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body { font-family: "Noto Sans", "Noto Sans Ethiopic", "DejaVu Sans", sans-serif; font-size: 9.6pt;
+       line-height: 1.5; color: var(--ink); margin: 0; background: #fff; }
+
+/* ---------- cover ---------- */
+.cover { height: 297mm; box-sizing: border-box; padding: 58mm 22mm 20mm 26mm; position: relative;
+         page-break-after: always; background: linear-gradient(180deg, #fbf8f3 0%, #fff 60%); }
+.cover .band { position: absolute; left: 0; top: 0; bottom: 0; width: 9mm; background: var(--accent); }
+.cover .kicker { text-transform: uppercase; letter-spacing: .18em; font-size: 9pt; color: var(--accent); margin: 0 0 6mm; font-weight: 600; }
+.cover .title { font-size: 30pt; line-height: 1.12; margin: 0 0 5mm; color: var(--ink); font-weight: 700; }
+.cover .subtitle { font-size: 14pt; color: var(--muted); margin: 0 0 12mm; line-height: 1.35; }
+.cover .lede { font-size: 10.5pt; max-width: 150mm; margin: 0 0 14mm; }
+.cover table.control { border-collapse: collapse; width: 150mm; font-size: 8.8pt; }
+.cover table.control th { text-align: left; color: var(--muted); font-weight: 600; width: 40mm; padding: 1.6mm 0;
+                          border-top: 1px solid var(--rule); vertical-align: top; background: none; }
+.cover table.control td { padding: 1.6mm 0; border-top: 1px solid var(--rule); border-left: none; border-right: none; border-bottom: none; }
+.cover .covernote { position: absolute; bottom: 18mm; left: 26mm; right: 22mm; font-size: 7.8pt; color: var(--muted);
+                    border-top: 1px solid var(--rule); padding-top: 3mm; margin: 0; }
+
+/* ---------- table of contents ---------- */
+.toc { page-break-after: always; }
+.tochead { font-size: 20pt; margin: 0 0 6mm; color: var(--ink); border: none; }
+.toc ul { list-style: none; padding: 0; margin: 0; }
+.toc li a { display: flex; align-items: baseline; color: var(--ink); text-decoration: none; }
+.toc li.l1 { margin-top: 2.6mm; font-weight: 700; font-size: 10pt; }
+.toc li.l2 { margin-left: 8mm; font-size: 9pt; line-height: 1.45; }
+.toc li.l2 .n { display: inline-block; min-width: 9mm; color: var(--muted); }
+.toc .dots { flex: 1; border-bottom: 1px dotted #b8a993; margin: 0 2mm; transform: translateY(-2.5pt); }
+.toc .pg { min-width: 7mm; text-align: right; font-variant-numeric: tabular-nums; }
+
+/* ---------- headings ---------- */
+h1 { page-break-before: always; font-size: 21pt; line-height: 1.2; margin: 0 0 7mm; padding-bottom: 3mm;
+     border-bottom: 2px solid var(--accent); color: var(--ink); position: relative; }
+h1 .chapno { display: block; font-size: 9pt; letter-spacing: .16em; text-transform: uppercase; color: var(--accent);
+             font-weight: 600; margin-bottom: 1.5mm; }
+h2 { font-size: 13.2pt; margin: 8mm 0 2.5mm; color: var(--ink); page-break-after: avoid; position: relative; }
+h3 { font-size: 10.8pt; margin: 5.5mm 0 1.8mm; color: var(--accent); page-break-after: avoid; position: relative; }
+h4 { font-size: 9.8pt; margin: 4mm 0 1mm; page-break-after: avoid; }
+h2 .n, h3 .n { color: var(--accent); margin-right: 1.5mm; font-variant-numeric: tabular-nums; }
+.mk { position: absolute; left: 0; top: 0; font-size: 2pt; color: #fff; white-space: nowrap; }
+
+p { margin: 0 0 2.6mm; orphans: 3; widows: 3; }
+ul, ol { margin: 0 0 2.8mm; padding-left: 6mm; }
+li { margin-bottom: 1mm; }
+li > p { margin-bottom: 1mm; }
+a { color: var(--accent); text-decoration: none; }
+strong { color: #140e0a; }
+hr { border: none; border-top: 1px solid var(--rule); margin: 5mm 0; }
+
+/* ---------- code ---------- */
+code { font-family: "Noto Sans Mono", "DejaVu Sans Mono", monospace; font-size: 8.4pt; background: var(--code-bg);
+       padding: .2mm .9mm; border-radius: 2px; }
+pre { background: var(--code-bg); border: 1px solid var(--code-border); border-left: 3px solid var(--accent);
+      border-radius: 3px; padding: 2.6mm 3mm; margin: 0 0 3.2mm; white-space: pre-wrap; word-break: break-word;
+      font-size: 7.7pt; line-height: 1.42; }
+pre code { background: none; padding: 0; font-size: inherit; }
+figure.code { margin: 2mm 0 3.5mm; }
+figure.code pre { margin: 0; break-inside: auto; }
+figcaption.src { font-family: "Noto Sans Mono", monospace; font-size: 7.2pt; color: var(--muted); margin: 0 0 1mm;
+                 page-break-after: avoid; }
+figcaption.src::before { content: "▸ "; color: var(--accent); }
+
+/* ---------- tables ---------- */
+table { border-collapse: collapse; width: 100%; margin: 0 0 4mm; font-size: 8.4pt; line-height: 1.38; break-inside: auto; }
+thead { display: table-header-group; }
+tr { break-inside: avoid; }
+th { background: var(--accent-soft); color: var(--ink); text-align: left; font-weight: 600; }
+th, td { border: 1px solid var(--rule); padding: 1.4mm 2mm; vertical-align: top; }
+td code, th code { font-size: 7.6pt; }
+.tabcap { font-size: 8.4pt; color: var(--muted); margin: 3mm 0 1.4mm; page-break-after: avoid; }
+.tabcap b, .figcap b { color: var(--accent); }
+
+/* ---------- figures ---------- */
+.figure { margin: 3mm 0 5mm; break-inside: avoid; text-align: center; }
+.figure .svgbox svg { max-width: 100%; height: auto; max-height: 222mm; }
+.figure.small .svgbox svg { max-height: 115mm; }
+.figure.landscape { page: landscape; break-before: page; break-after: page; }
+.figure.landscape { width: 273mm; margin: 0; }
+.figure.landscape .svgbox svg { width: 273mm; max-width: none !important; max-height: 168mm; }
+.figcap { font-size: 8.4pt; color: var(--muted); text-align: left; margin: 2mm 0 0; padding-top: 1.6mm;
+          border-top: 1px solid var(--rule); }
+
+/* ---------- callouts ---------- */
+blockquote { margin: 3mm 0 4mm; padding: 2.4mm 3.5mm; background: #fbf6ec; border-left: 3px solid #c9a94a;
+             color: #3a2e1e; break-inside: avoid; }
+blockquote p:last-child { margin-bottom: 0; }
+blockquote.warn, .warn { background: #fbeeeb; border-left-color: #a3473a; }

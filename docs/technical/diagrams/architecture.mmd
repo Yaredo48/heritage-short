@@ -1,0 +1,67 @@
+flowchart TB
+  classDef ext fill:#e6efe6,stroke:#4d7a4d,color:#1f331f
+  classDef store fill:#eef1f7,stroke:#5a6b8c,color:#1d2433
+  classDef core fill:#fff6d8,stroke:#b08a2e,color:#3a2e0e
+
+  subgraph OP["Operator interface"]
+    MK["Makefile<br/>make film · make shot SHOT=s03 · make test"]
+    RUN["run.py<br/>argparse CLI · COMMANDS table · FILM sequence"]
+    MK --> RUN
+  end
+
+  subgraph CON["Contract and consent record"]
+    SB[("storyboard.json")]
+    SCH[("schema/storyboard.schema.json")]
+    ETH[("ETHICS.md consent table")]
+  end
+
+  VAL["pipeline/validate.py<br/>load_storyboard(): JSON Schema + cross-field checks + consent gate"]
+  RUN --> VAL
+  SB --> VAL
+  SCH --> VAL
+  ETH --> VAL
+
+  subgraph ST["Stage modules (pipeline/)"]
+    NAR["narration.py + audio.py<br/>Stage 4 · timeline()"]
+    KEY["keyframes.py<br/>Stage 1 · refs"]
+    SHO["shots.py<br/>Stage 2"]
+    MUS["music.py<br/>Stage 3"]
+    ASM["assemble.py<br/>Stage 5"]
+    AUX["radio.py · kaggle_io.py · costs.py · script.py · smoke.py"]
+  end
+  VAL --> ST
+
+  subgraph CORE["Shared core"]
+    PRV["providers.py<br/>gemini_text · gemini_tts · cloudflare_image"]
+    COM["common.py<br/>canonical_hash · cache_hit · call_with_retries<br/>log_event · write_atomic · ffmpeg/probe"]
+  end
+  NAR --> PRV
+  KEY --> PRV
+  PRV --> COM
+  ST --> COM
+
+  subgraph EXT["External services"]
+    GEM["Google Gemini API<br/>3.8 Flash TTS · 3.8 Flash text"]
+    CF["Cloudflare Workers AI<br/>FLUX.2 klein 4B"]
+    KAG["Kaggle GPU notebooks<br/>Wan 2.2 TI2V-5B · ACE-Step 1.5"]
+  end
+  PRV -- "HTTPS + API key from .env" --> GEM
+  PRV -- "HTTPS + API token from .env" --> CF
+  AUX -- "heritage_job.zip (manual upload)" --> KAG
+  KAG -- "heritage_results.zip (manual download)" --> AUX
+
+  FF["FFmpeg 6 / ffprobe<br/>(local binaries)"]
+  SHO --> FF
+  MUS --> FF
+  ASM --> FF
+
+  subgraph STO["Local storage"]
+    OUT[("outputs/<br/>content-addressed files")]
+    LOG[("runs.jsonl<br/>one line per event")]
+  end
+  COM --> OUT
+  COM --> LOG
+
+  class GEM,CF,KAG ext
+  class SB,SCH,ETH,OUT,LOG store
+  class PRV,COM core

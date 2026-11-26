@@ -1,0 +1,20 @@
+sequenceDiagram
+  autonumber
+  actor U as Operator
+  participant P as Local pipeline (kaggle_io.py)
+  participant D as Kaggle dataset
+  participant W as wan_video.ipynb (T4)
+  participant A as ace_step_music.ipynb (T4)
+  U->>P: make kaggle-export
+  P->>P: copy current keyframes, write jobs.json<br/>(motion prompts + HIDE_FACE suffix, seeds, WAN_PARAMS, music caption)
+  P-->>U: kaggle/heritage_job.zip
+  U->>D: upload zip as dataset "heritage-job"
+  U->>W: attach dataset, GPU on, Run all
+  W->>W: per job: image-to-video, export clip,<br/>append line to runs_kaggle.jsonl (gpu_minutes)
+  U->>A: attach dataset, GPU on, Run all
+  A->>A: per seed: generate_music, copy seed_N.wav,<br/>append line to runs_kaggle.jsonl
+  W-->>U: heritage_results.zip (clips/, runs_kaggle.jsonl)
+  A-->>U: heritage_results.zip (music/, runs_kaggle.jsonl)
+  U->>P: make import ZIP=heritage_results.zip
+  P->>P: clips → outputs/shots/wan/<id>_<keyframe key>.mp4<br/>music → outputs/music/candidates/seed_N.wav<br/>merge new log lines into runs.jsonl (no duplicates)
+  Note over U,P: Not yet executed: the notebooks have not been run on Kaggle.

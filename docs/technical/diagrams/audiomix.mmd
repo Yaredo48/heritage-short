@@ -1,0 +1,22 @@
+flowchart TB
+  classDef src fill:#eef1f7,stroke:#5a6b8c,color:#1d2433
+  classDef f fill:#f4ede3,stroke:#7a5c3e,color:#2b211a
+  classDef o fill:#e6efe6,stroke:#4d7a4d,color:#1f331f
+  subgraph V["Narration path (one chain per shot, then mixed)"]
+    direction LR
+    N1["narration sNN<br/>(processed WAV)"] --> LM["match_loudness<br/>→ −20 LUFS"] --> AD["adelay<br/>(start + lead_in) ms"] --> AM["amix normalize=0<br/>apad · atrim total"] --> SPL["asplit=2"]
+  end
+  subgraph MU["Music path"]
+    direction LR
+    SCORE["score WAV<br/>(−20 LUFS)"] --> LOOP["-stream_loop −1<br/>atrim total"] --> FADE["afade in 2 s<br/>afade out 3.5 s"] --> G["volume<br/>music_gain_db = −8 dB"]
+  end
+  subgraph MS["Ducking and mastering"]
+    direction LR
+    SC["sidechaincompress<br/>threshold 0.02 · ratio 6<br/>attack 300 ms · release 1500 ms"] --> MX["amix<br/>voice + ducked music"] --> LIM["alimiter<br/>pre_limiter_db = −10 dBFS"] --> P1["loudnorm pass 1<br/>measure I · TP · LRA"] --> P2["loudnorm pass 2, linear<br/>−14 LUFS · −1.5 dBTP"] --> OUT["final/mix_&lt;key&gt;.wav<br/>48 kHz stereo"]
+  end
+  SPL -->|"key (sidechain)"| SC
+  SPL -->|voice| MX
+  G -->|music| SC
+  class N1,SCORE src
+  class LM,AD,AM,SPL,LOOP,FADE,G,SC,MX,LIM,P1,P2 f
+  class OUT o

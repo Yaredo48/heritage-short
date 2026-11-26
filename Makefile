@@ -3,7 +3,7 @@ PY ?= .venv/bin/python
 RUN = "$(PY)" run.py
 
 .PHONY: help setup smoke validate script narration timing radio refs keyframes shots music \
-        assemble film shot kaggle-export import costs report test clean
+        assemble film shot kaggle-export import costs report techdoc test clean
 
 help:            ## list targets
 	@grep -E '^[a-z-]+:.*##' $(MAKEFILE_LIST) | sed 's/:.*##/\t/'
@@ -55,6 +55,8 @@ costs:           ## summarise runs.jsonl into COSTS.md
 	$(RUN) costs
 report:          ## export docs/REPORT.md to PDF and Word for the submission form
 	"$(PY)" docs/export_report.py
+techdoc:         ## build PROJECT_TECHNICAL_DOCUMENTATION.pdf (needs Google Chrome + poppler-utils)
+	"$(PY)" docs/technical/build_pdf.py
 test:            ## offline tests (no API calls)
 	"$(PY)" -m pytest -q
 

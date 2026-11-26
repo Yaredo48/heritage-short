@@ -1,0 +1,59 @@
+flowchart TB
+  classDef dec fill:#fff6d8,stroke:#b08a2e,color:#3a2e0e
+  classDef model fill:#e6efe6,stroke:#4d7a4d,color:#1f331f
+  classDef stop fill:#f7e1dd,stroke:#a3473a,color:#3d1610
+  classDef out fill:#eef1f7,stroke:#5a6b8c,color:#1d2433
+
+  subgraph P0["0 · validate (every stage repeats this)"]
+    direction LR
+    V0(["make film"]) --> V1["load_storyboard()<br/>schema + cross-field + consent"] --> V2{"errors?"}
+    V2 -->|yes| VX(["SystemExit<br/>no model called"])
+    V2 -->|no| V3["warnings printed<br/>(consent, draft)"]
+  end
+
+  subgraph P4["Stage 4 · narration (per shot)"]
+    direction LR
+    N0["narration_key<br/>hash(am, voice, style, model)"] --> N1{"raw WAV<br/>exists?"}
+    N1 -->|no| N3["gemini_tts()<br/>retries · write_atomic"]
+    N1 -->|yes| N2["cache_hit"]
+    N3 --> N4["compress_pauses<br/>→ sNN_key_p450.wav"]
+    N2 --> N4
+  end
+
+  subgraph P1["Stage 1 · keyframes (per shot)"]
+    direction LR
+    K0["shot_prompt()<br/>no_face_prompt w/o consent"] --> K1{"PNG for<br/>keyframe_key?"}
+    K1 -->|no| K3["cloudflare_image()<br/>to_png · write_atomic"]
+    K1 -->|yes| K2["cache_hit"]
+    K3 --> K4["contact_sheet.jpg"]
+    K2 --> K4
+  end
+
+  subgraph P2["Stage 2 · shots (per shot × 2 aspects)"]
+    direction LR
+    T0["timeline()<br/>dur = max(planned,<br/>0.4 + narr + 0.6)"] --> S0{"video = wan and clip<br/>for current keyframe?"}
+    S0 -->|yes| S1["clip_filter<br/>slow ≤1.6×, hold"]
+    S0 -->|no| S2["kenburns_filter<br/>eased zoompan"]
+    S1 --> S3["segment, dur + 0.5 s<br/>cached mp4"]
+    S2 --> S3
+  end
+
+  subgraph P3["Stage 3 · music"]
+    direction LR
+    M0{"music.chosen_seed<br/>set?"} -->|yes| M1["match_loudness<br/>candidate → −20 LUFS"]
+    M0 -->|no| M2["placeholder()<br/>FFmpeg pad → −20 LUFS"]
+  end
+
+  subgraph P5["Stage 5 · assemble"]
+    direction LR
+    A0["mix_audio()<br/>duck · limit · loudnorm"] --> A1["subtitles · end card<br/>DRAFT mark"] --> A2["render() × 2<br/>xfade · ass · x264"] --> A3{"verify()<br/>all checks ok?"}
+    A3 -->|yes| AD(["MP4 × 2 · SRT<br/>report.json"])
+    A3 -->|no| AX(["SystemExit"])
+  end
+
+  P0 --> P4 --> P1 --> P2 --> P3 --> P5
+
+  class V2,N1,K1,S0,M0,A3 dec
+  class N3,K3 model
+  class VX,AX stop
+  class AD out

@@ -1,0 +1,20 @@
+flowchart TD
+  classDef dec fill:#fff6d8,stroke:#b08a2e,color:#3a2e0e
+  classDef stop fill:#f7e1dd,stroke:#a3473a,color:#3d1610
+  classDef ok fill:#e6efe6,stroke:#4d7a4d,color:#1f331f
+  S(["attempt = 1"]) --> C["fn(): exactly one HTTP request"]
+  C -->|returns result, meta| OK["log model_call status=ok<br/>latency_s, cost"]
+  OK --> R(["return result"])
+  C -->|raises| E["log model_call status=error<br/>http_status, latency_s, error[:300]"]
+  E --> Q{"retryable?<br/>429 · 500 · 502 · 503 · 504<br/>ConnectionError · Timeout"}
+  Q -->|no, e.g. 400| F1(["raise ModelCallError"])
+  Q -->|yes| W["wait = retry_delay(err, attempt)<br/>429: Retry-After header + 1 s, else 'retry in XhYmZs' + 1 s, else 20 s × attempt<br/>other: 2^attempt + random(0, 1) s"]
+  W --> L{"wait > MAX_RETRY_WAIT_S<br/>(120 s)?"}
+  L -->|yes: daily quota| F2(["raise ModelCallError<br/>'quota exhausted … rerun later'"])
+  L -->|no| A{"attempt == 4?"}
+  A -->|yes| F1
+  A -->|no| SL["time.sleep(wait)<br/>attempt += 1"]
+  SL --> C
+  class Q,L,A dec
+  class F1,F2 stop
+  class OK,R ok
