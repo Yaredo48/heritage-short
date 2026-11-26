@@ -71,7 +71,7 @@ Outputs: `outputs/final/the_silent_language_of_a_mother_s_love_vertical.mp4` and
 
 1. `make kaggle-export` → `kaggle/heritage_job.zip` (keyframes + `jobs.json`).
 2. On Kaggle (phone-verified account): *Datasets → New* → upload the zip. Open `notebooks/wan_video.ipynb` and `notebooks/ace_step_music.ipynb`, *Add input* → the dataset, set *Accelerator: GPU T4* and *Internet: on*, and run all.
-3. Download `heritage_results.zip` from each notebook's output, then run `make import ZIP=~/Downloads/heritage_results.zip`.
+3. Download `heritage_results_wan.zip` and `heritage_results_music.zip` from the notebooks' output, then run `make import ZIP=…` once for each.
 4. For each clip you like, set that shot's `"video": "wan"`. Listen to the music candidates under the narration and set `music.chosen_seed` and `music.choice_reason`.
 5. `make film`.
 

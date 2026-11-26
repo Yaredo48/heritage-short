@@ -261,7 +261,7 @@ Table: External integrations and their failure behaviour.
 | Gemini API (TTS) | `POST https://generativelanguage.googleapis.com/v1beta/interactions` | `x-goog-api-key` header, from `GEMINI_API_KEY` | Retries on 429/5xx with server-hinted waits; fail fast if the wait exceeds 120 s |
 | Gemini API (text) | `POST …/v1beta/models/{model}:generateContent` | same | After retries, one fallback to `GEMINI_TEXT_FALLBACK` if the error contains 503 |
 | Cloudflare Workers AI | `POST https://api.cloudflare.com/client/v4/accounts/{account}/ai/run/{model}` (multipart) | `Authorization: Bearer` with `CLOUDFLARE_API_TOKEN` | Same retry policy; JSON errors with `success: false` raise `ModelCallError` |
-| Kaggle | Manual: upload `kaggle/heritage_job.zip` as a dataset; download `heritage_results.zip` | Kaggle account (phone-verified) | Notebook logs failed clips as `status: error` and continues; locally, a missing clip falls back to Ken Burns |
+| Kaggle | Manual: upload `kaggle/heritage_job.zip` as a dataset; download `heritage_results_wan.zip` / `heritage_results_music.zip` | Kaggle account (phone-verified) | Notebook logs failed clips as `status: error` and continues; locally, a missing clip falls back to Ken Burns |
 | FFmpeg / ffprobe | Local subprocess | — | `check=True`: any error stops the stage |
 
 ## Consent gate as an architectural concern
@@ -870,20 +870,23 @@ Both notebooks:
 - locate `jobs.json` under `/kaggle/input`;
 - write results to `/kaggle/working/results`;
 - log each attempt with the same fields as `common.log_event`, plus `gpu` and `cost.gpu_minutes`;
-- zip everything into `heritage_results.zip`.
+- zip everything into `heritage_results_wan.zip` or `heritage_results_music.zip`.
 
 The Wan notebook:
 
+- pins diffusers 0.43.0 and loads `WanImageToVideoPipeline` with `expand_timesteps=True`, the Wan 2.2 TI2V mode (checked in the library source);
 - loads the VAE in fp32 and the pipeline in fp16 with `enable_model_cpu_offload()` to fit a 16 GB T4;
+- by default animates only the non-character shots s01, s02, s08 and s09, because image-to-video could turn the mother's face to the camera while consent is pending;
 - resizes each keyframe to the model's patch grid under `max_area`;
+- rejects clips with black or NaN frames (a float16 risk on a T4);
 - skips clips that already exist, so a timed-out session can be resumed;
 - logs exceptions (out-of-memory, NaN output) as `status: error` and moves on.
 
 The ACE-Step notebook:
 
-- initialises `AceStepHandler` with `acestep-v15-turbo`;
-- optionally loads the 0.6B LM planner;
-- generates one instrumental per seed with 8 inference steps.
+- installs ACE-Step with its official `uv sync` into `/tmp`, isolated from Kaggle's packages and outside the 20 GB output limit;
+- runs a generation script inside that environment, which initialises `AceStepHandler` with `acestep-v15-turbo` and checks the returned `ok` flag;
+- generates one instrumental per seed with 8 inference steps, without the LM planner, and with `use_random_seed=False` so the seeds are honoured (FAILURES F10).
 
 Neither notebook has been run yet.
 

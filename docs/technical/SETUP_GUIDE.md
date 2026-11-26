@@ -88,7 +88,7 @@ To force a new take of an unchanged prompt: `.venv/bin/python run.py keyframes -
 
 1. Run `make kaggle-export`. It writes `kaggle/heritage_job.zip` (the keyframes plus `jobs.json`).
 2. On Kaggle, upload the zip as a dataset. In each of `notebooks/wan_video.ipynb` and `notebooks/ace_step_music.ipynb`: add the dataset, choose *GPU T4*, turn *Internet* on, and *Run all*.
-3. Download `heritage_results.zip` and run `make import ZIP=~/Downloads/heritage_results.zip`.
+3. Download `heritage_results_wan.zip` and `heritage_results_music.zip`, then import each one: `make import ZIP=~/Downloads/heritage_results_wan.zip` (and the same for the music zip).
 4. Set `"video": "wan"` on the shots whose clips you want to use. Set `music.chosen_seed` and `music.choice_reason`. Then run `make film`.
 
 ## 8. Troubleshooting

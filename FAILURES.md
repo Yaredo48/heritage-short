@@ -48,6 +48,14 @@ What broke, what I tried, and what fixed it or worked around it. Times are UTC o
 - Paths with spaces (`week 0/challenge 2`) break the `ass=` subtitle filter. Fixed by running FFmpeg with `cwd` set to the work folder and passing only the file name.
 - The vertical subtitles first produced a one-word cue ("story."). Fixed with balanced wrapping (E08).
 
+## F10 · The Kaggle notebooks had three defects that a first run would have hit
+- **How found:** before the first Kaggle run (26 Nov), I checked the notebooks against the library source: the diffusers 0.43.0 wheel and a clone of the ACE-Step 1.5 repository (`acestep/inference.py`, `docs/en/INFERENCE.md`, `pyproject.toml`).
+- **ACE-Step seeds were silently ignored.** `GenerationConfig.use_random_seed` defaults to `True`, and then `prepare_seeds` draws random seeds whatever `seed` says. The three "seed 11/22/33" candidates would have been unreproducible. Fixed: `use_random_seed=False, seeds=[seed]`.
+- **ACE-Step failures would not raise.** `initialize_service()` and `LLMHandler.initialize()` return `(status, ok)` instead of raising. The LM checkpoint is not downloaded automatically, and the LM runs in bfloat16, which a T4 lacks. Fixed: the `ok` flag is checked, and the optional LM planner is dropped (caption, bpm and key are given explicitly).
+- **ACE-Step install.** `pip install -e .` cannot work: `pyproject.toml` pins `torch==2.10.0+cu128` from a PyTorch index and a local `nano-vllm` that only `uv` resolves. Fixed: the official `uv sync` into `/tmp` and a generation script run with `uv run`.
+- **Wan 2.2.** The model card only shows text-to-video. The diffusers source confirms that `WanImageToVideoPipeline` supports TI2V-5B through `expand_timesteps` ("Wan2.2 ti2v"). Fixed: pinned `diffusers==0.43.0`, `expand_timesteps=True` passed explicitly, and a check that rejects black or NaN frames. Character shots are excluded by default (consent).
+- **Lesson:** "not run yet" code is untested code; reading the dependency's source is cheaper than a failed GPU session.
+
 ## Pending (filled in after the Kaggle runs)
 
 | Stage | What happened | What I tried | Resolution |

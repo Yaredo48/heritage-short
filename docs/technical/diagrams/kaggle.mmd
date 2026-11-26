@@ -13,8 +13,8 @@ sequenceDiagram
   W->>W: per job: image-to-video, export clip,<br/>append line to runs_kaggle.jsonl (gpu_minutes)
   U->>A: attach dataset, GPU on, Run all
   A->>A: per seed: generate_music, copy seed_N.wav,<br/>append line to runs_kaggle.jsonl
-  W-->>U: heritage_results.zip (clips/, runs_kaggle.jsonl)
-  A-->>U: heritage_results.zip (music/, runs_kaggle.jsonl)
-  U->>P: make import ZIP=heritage_results.zip
+  W-->>U: heritage_results_wan.zip (clips/, runs_kaggle.jsonl)
+  A-->>U: heritage_results_music.zip (music/, runs_kaggle.jsonl)
+  U->>P: make import ZIP=… (once per zip)
   P->>P: clips → outputs/shots/wan/<id>_<keyframe key>.mp4<br/>music → outputs/music/candidates/seed_N.wav<br/>merge new log lines into runs.jsonl (no duplicates)
   Note over U,P: Not yet executed: the notebooks have not been run on Kaggle.

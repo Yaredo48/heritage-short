@@ -128,3 +128,4 @@
 {"ts": "2026-11-25T14:57:15.847+00:00", "run_id": "20261125T145701Z-128a34", "event": "stage_done", "stage": "radio", "output": "outputs/radio/radio_cut.mp4", "length_s": 84.41, "score_source": "placeholder"}
 {"ts": "2026-11-25T16:46:32.301+00:00", "run_id": "20261125T164631Z-fc03f1", "event": "export", "stage": "kaggle", "output": "kaggle/heritage_job.zip", "wan_jobs": 9, "music_seeds": [11, 22, 33]}
 {"ts": "2026-11-25T17:47:58.235+00:00", "run_id": "20261125T174758Z-9f41d0", "event": "validation", "stage": "validate", "ok": true, "file": "storyboard.json", "version": 1, "shots": 9, "total_s": 73}
+{"ts": "2026-11-26T12:24:05.676+00:00", "run_id": "20261126T122404Z-d8b27c", "event": "export", "stage": "kaggle", "output": "kaggle/heritage_job.zip", "wan_jobs": 9, "music_seeds": [11, 22, 33]}
