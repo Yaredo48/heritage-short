@@ -2,15 +2,12 @@
 
 **B2W0 · AI-Content Generation · Assignment 1: Codebase and Report**
 
-| | |
+| Item | Where |
 |---|---|
 | Repository | https://github.com/Yaredo48/heritage-short |
 | One command | `make setup && make film` (README.md, "Install" and "Run it") |
-| Film (9:16 / 16:9) | ✍️ _link_ / ✍️ _link_ |
-| Walkthrough | ✍️ _link_ |
-| Public post | ✍️ _link_ |
+| Film, walkthrough, post | Submitted with assignment 2. The film is shared privately with the graders, not published, because consent is still pending (ETHICS.md, SUBMISSION.md) |
 
-> **Before you export this file:** the only ✍️ left are things that must come from you: links, what your family said, and your own instinct. Replace each one with real words and events, delete this box, then run `make report`. That writes `docs/REPORT.pdf` and `docs/REPORT.docx`. Everything not marked ✍️ is backed by a file named in brackets. Check each one, and change anything you would not say yourself. The interviewer will ask about it.
 
 ---
 
@@ -38,20 +35,18 @@ Her face is never shown until she consents. She appears from behind, through her
 
 Every model output is cached by a hash of its inputs, retries follow the provider's own wait hint, and every model call writes one line to `runs.jsonl`. `make film` rebuilds everything. A fresh clone with no API keys rebuilt the film with 0 model calls and 18 cache hits (COSTS.md, "Local compute"; ARCHITECTURE.md).
 
-## 2. What I learned from my audience ✍️
+## 2. What I learned from my audience
 
-> Fill this from DESIGN.md §4 and §5 **after** the tests. Each test needs at least three people from the audience above. Quote what they actually said.
+**The honest answer: the two audience tests were not run before the deadline.** The radio cut (`outputs/radio/radio_cut.mp4`), the near-final cut, the five test questions and ready-to-send messages are all prepared (DESIGN.md §4–§5, `docs/FAMILY_KIT.md`), but no family member has watched either cut yet. I am not reporting reactions I do not have. As a result:
+- no change in `storyboard.json` is attributed to audience feedback (it is still version 1);
+- the film is not published, because the same family conversation is also where my mother's consent comes from (ETHICS.md).
 
-**First test: the radio cut** (`outputs/radio/radio_cut.mp4`, Amharic narration over the temp score on a black screen).
-- Who, when and how: ✍️
-- What they said, in their words: ✍️
-- What surprised me: ✍️
-- What I changed in `storyboard.json` (version 2, changelog line): ✍️
+**What I did instead, clearly labelled as not audience evidence** (DESIGN.md §6): I answered by measurement the test questions a machine can answer.
+- *Could you read the subtitles?* At most 13.8 characters per second, with the shortest cue 3.3 s (E15).
+- *Is the music too loud under the voice?* It is 13 dB lower under speech (E10).
+- *Was any Amharic word mispronounced?* An ASR round trip of all 9 lines (E16) flags four specific words, in s01, s02, s03 and s05. Those are exactly the words to play to a native speaker first.
 
-**Second test: the near-final cut**, watched on a phone.
-- Who (at least one person who did not hear the radio cut): ✍️
-- What they said: ✍️
-- What changed (version 3, changelog line): ✍️
+These checks cannot tell me whether the story lands or feels true to her. Only the family can.
 
 **Before the tests, the evidence had already changed the story** (DESIGN.md §6):
 - **The narration sets the timing.** The Amharic lines run longer than planned, so the 70 seconds of planned shots grew to 81.4 seconds (`make timing`).
@@ -65,20 +60,19 @@ Every model output is cached by a hash of its inputs, retries follow the provide
 2. **The obvious fix ran into the quota.** I tried a retake with a faster style, but the Gemini TTS free tier allows 3 requests per minute and about 10 per day, and nine lines need nine calls. The retake stopped after 3 lines. Those 3 lines were only 12 % shorter overall, and one (s03) came out *longer*, so the voice style is not a reliable control (E02, F03, F04).
 3. **The standard tool was not enough.** FFmpeg's `silenceremove` only took the total from 77.4 s to 75.3 s (E03).
 4. **What worked.** I wrote a pause compressor in about 60 lines of standard Python (`pipeline/audio.py`). It cuts any silence longer than a set limit down to that limit.
-   - I compared three limits: 0.35, 0.45 and 0.55 s (E04).
-   - At 0.45 s the narration went from 77.4 s to 67.9 s, and the film from 92.2 s to **84.4 s**.
-   - It needed **zero extra model calls**.
-   - The original takes are kept untouched in `outputs/narration/raw/`.
-   - The limit is one number in the storyboard (`voice.max_pause_s`) and is part of the cache key, so changing it regenerates only the trimmed audio, never the TTS call.
+    - I compared three limits: 0.35, 0.45 and 0.55 s (E04).
+    - At 0.45 s the narration went from 77.4 s to 67.9 s, and the film from 92.2 s to **84.4 s**.
+    - It needed **zero extra model calls**.
+    - The original takes are kept untouched in `outputs/narration/raw/`.
+    - The limit is one number in the storyboard (`voice.max_pause_s`) and is part of the cache key, so changing it regenerates only the trimmed audio, never the TTS call.
 5. **What it fixed in the retry logic.** The old backoff waited 2–4 s when the server asked for 39 s. Then it spent about 10 minutes retrying a daily quota that would only reset 17 hours later. Retries now read the server's wait hint and stop at once when the wait is over 2 minutes, with a clear "quota exhausted, rerun later" message (`pipeline/common.py`; `tests/test_pipeline.py::test_daily_quota_fails_fast`).
 
 **What it taught me:** on a free tier the quota is the real budget. A deterministic fix after generation, cached and tested, beats paying for more generation. It is also why family corrections to the Amharic have to be gathered and applied in one batch (COSTS.md).
 
 ## 4. A suggested practice that beat my instinct
 
-**Logging every model call to `runs.jsonl`.** ✍️ _My instinct was to …_ (for example, "print errors to the terminal and move on"). _Replace it with what you would really have done._
+**Logging every model call to `runs.jsonl`.** The default when a script calls an API is to print errors to the terminal and move on. Writing one JSON line per attempt looks like overhead at first; it turned out to be the evidence behind most of this report:
 
-The log is the evidence behind most of this report:
 - **It showed the smoke test had never run.** The smoke-test output files were in the repo, but they were 0 bytes and there was no `runs.jsonl`. The files existed; the log showed that nothing had run (F01).
 - **It separated two different limits.** The 429 errors looked the same, but their bodies said "3 requests per minute, retry in 39s" and "10 requests per day, retry in 17h50m8s". Only the log told me the burst limit from the daily quota, which is why the retry logic now treats them differently (F03, F04).
 - **It became the cost report.** `make costs` builds the COSTS.md table straight from the log: every line has stage, model, status, latency and attempt.
@@ -116,23 +110,31 @@ The brief judges this part on insight, not volume. Each item below exists in the
   - Its `pip` install cannot resolve its `uv`-only dependencies.
   
   It also confirmed that Wan 2.2 TI2V-5B image-to-video is supported through `expand_timesteps`.
-- **Amharic and the image model** (E01, E06). The model does not know "jebena" and drew a vase, so cultural objects are described by their shape. ✍️ _Optional: if your listeners noted mispronounced Amharic words in the user tests (DESIGN.md §4, last column), list them here. That is the brief's "extra language tested, document where it fails" direction._
+- **More languages: where Gemini TTS stops being intelligible** (E16, `make langtest`). I measured it without listeners, by transcribing the TTS audio back and computing the character error rate (CER) against the text.
+  - **English control: 0.000 CER**, so the round trip itself is clean.
+  - **The same line, by language:** Afaan Oromo 0.108, Somali 0.197, Amharic 0.226, Tigrinya 0.270.
+  - **The 9 real Amharic narration lines:** mean 0.148, or 0.123 once homophone letters are folded. About a sixth of the apparent errors are just ሕ/ህ, ሠ/ሰ and ዕ/እ, which sound the same.
+  - **The meaning-changing errors cluster** on the first word of a line and on long inflected words. For example, ሠዋች ("she sacrificed") came back as ሰዎች ("people"). Place names were recognised.
+  - **Tigrinya failed before speech.** The translation itself mixed Cyrillic, Latin and Georgian letters into Ge'ez words.
+  - **Caveat:** the transcriber is the same model family and a weaker one, so this measures intelligibility *to Gemini*. It turns "check the pronunciation" into four specific words for a native speaker.
+- **Amharic and the image model** (E01, E06). The model does not know "jebena" and drew a vase, so cultural objects are described by their shape.
+- **Fallbacks are code too** (F11). During E16 the main Gemini model was overloaded, and the fallback added on day one failed with HTTP 404: the model name had been guessed and had never been run. I checked the real names with `ListModels` and fixed it.
 - **A tool others can follow.**
-  - An offline end-to-end test builds both exports with fake models and real FFmpeg (`tests/`, 24 tests).
+  - An offline end-to-end test builds both exports with fake models and real FFmpeg (`tests/`, 25 tests).
   - A 61-page technical document is built from the code itself, so its excerpts cannot drift from the implementation (`make techdoc`, `PROJECT_TECHNICAL_DOCUMENTATION.pdf`).
 
 ## 7. What I would build next
 
 1. **Choose the Amharic voice by ear, not by length.**
-   - Make several TTS takes per line and have Amharic speakers compare them blind.
-   - Pin the chosen take in the storyboard.
-   - Why: E02 showed that the voice style instruction does not reliably control pace, and TTS has no seed, so today one take per line is luck.
+    - Make several TTS takes per line and have Amharic speakers compare them blind.
+    - Pin the chosen take in the storyboard.
+    - Why: E02 showed that the voice style instruction does not reliably control pace, and TTS has no seed, so today one take per line is luck.
 2. **Detect faces in generated images automatically.**
-   - Run a face detector over every character keyframe and Wan clip, and fail the stage if a face is visible while likeness consent is missing.
-   - Why: E05 and F07 showed that a "no face" prompt is not a guarantee, and an eye check does not scale.
+    - Run a face detector over every character keyframe and Wan clip, and fail the stage if a face is visible while likeness consent is missing.
+    - Why: E05 and F07 showed that a "no face" prompt is not a guarantee, and an eye check does not scale.
 3. **Then, with consent, character consistency.** Make a character sheet, possibly train a small LoRA on it, and measure whether she stays recognisably the same person across shots.
 
-✍️ _Optional: say in one sentence which of these you would do first and why, in your own words._
+The first is the most urgent: E16 shows the Amharic voice is the weakest link that I can measure, and it is the part the family hears.
 
 ---
 
@@ -141,13 +143,14 @@ The brief judges this part on insight, not volume. Each item below exists in the
 | Claim | Evidence |
 |---|---|
 | Audience and intent were written before generation | DESIGN.md §1; commit `1b715f8` |
+| User tests: not run; status and prepared protocol | DESIGN.md §4–§6; `docs/FAMILY_KIT.md` |
 | Every shot has a stated reason | DESIGN.md §3; `reason` field of every shot in `storyboard.json` |
 | The storyboard is validated before every stage | `schema/storyboard.schema.json`; `pipeline/validate.py`; `tests/test_storyboard.py` |
 | Only what changed regenerates | `cache_hit` vs `model_call` lines in `runs.jsonl`; `tests/test_pipeline.py` (cache tests) |
 | Retries and quota handling | `pipeline/common.py`; FAILURES.md F02–F04 |
 | One command from a clean clone | COSTS.md, "Local compute" (fresh clone, exit 0, 0 model calls) |
-| Experiments, each with a hypothesis | EXPERIMENTS.md E01–E10 and E15 (E11–E14 are the Kaggle runs) |
-| Real blockers and fixes | FAILURES.md F01–F10 |
+| Experiments, each with a hypothesis | EXPERIMENTS.md E01–E10, E15, E16 (E11–E14 are the Kaggle runs, not yet run) |
+| Real blockers and fixes | FAILURES.md F01–F11 |
 | Latency, cost and free-tier limits | COSTS.md (generated from `runs.jsonl`) |
 | Consent, licences, labelling | ETHICS.md; `consent` block in `storyboard.json` |
 | Both exports verified | `outputs/final/report.json` (duration, size, codecs, LUFS, true peak) |

@@ -25,31 +25,40 @@ KLEIN_OUT_TILE, KLEIN_IN_TILE, USD_PER_NEURON = 26.05, 5.37, 0.011 / 1000
 # ---------- Gemini text ----------
 
 def gemini_text(prompt: str, *, stage: str, shot: str | None = None,
-                json_mode: bool = False, temperature: float = 0.7) -> str:
+                json_mode: bool = False, temperature: float = 0.7,
+                audio: bytes | None = None, audio_mime: str = "audio/wav") -> str:
     """Flash first; if it is still overloaded after retries (503 'high demand',
-    seen in the smoke test on 2026-11-25), fall back to Flash-Lite once."""
+    seen in the smoke test on 2026-11-25), fall back to Flash-Lite once.
+    With `audio`, the clip is sent with the prompt (used for transcription)."""
     primary = env("GEMINI_TEXT_MODEL", "gemini-3.8-flash")
-    fallback = os.environ.get("GEMINI_TEXT_FALLBACK", "gemini-3.8-flash-lite")
+    fallback = os.environ.get("GEMINI_TEXT_FALLBACK", "gemini-flash-lite-latest")
     try:
         return _gemini_text_once(primary, prompt, stage=stage, shot=shot,
-                                 json_mode=json_mode, temperature=temperature)
+                                 json_mode=json_mode, temperature=temperature,
+                                 audio=audio, audio_mime=audio_mime)
     except ModelCallError as err:
         if not fallback or fallback == primary or "503" not in str(err):
             raise
         print(f"  {primary} overloaded; falling back to {fallback}")
         return _gemini_text_once(fallback, prompt, stage=stage, shot=shot,
-                                 json_mode=json_mode, temperature=temperature)
+                                 json_mode=json_mode, temperature=temperature,
+                                 audio=audio, audio_mime=audio_mime)
 
 
 def _gemini_text_once(model: str, prompt: str, *, stage: str, shot: str | None,
-                      json_mode: bool, temperature: float) -> str:
+                      json_mode: bool, temperature: float,
+                      audio: bytes | None = None, audio_mime: str = "audio/wav") -> str:
     key = env("GEMINI_API_KEY")
 
     def once():
         config = {"temperature": temperature}
         if json_mode:
             config["responseMimeType"] = "application/json"
-        body = {"contents": [{"role": "user", "parts": [{"text": prompt}]}],
+        parts = [{"text": prompt}]
+        if audio is not None:
+            parts.insert(0, {"inline_data": {"mime_type": audio_mime,
+                                             "data": base64.b64encode(audio).decode("ascii")}})
+        body = {"contents": [{"role": "user", "parts": parts}],
                 "generationConfig": config}
         resp = check_http(requests.post(
             f"{GEMINI_BASE}/models/{model}:generateContent",
@@ -65,7 +74,8 @@ def _gemini_text_once(model: str, prompt: str, *, stage: str, shot: str | None,
 
     return call_with_retries(once, stage=stage, shot=shot, provider="gemini", model=model,
                              params={"temperature": temperature, "json_mode": json_mode,
-                                     "prompt_chars": len(prompt)})
+                                     "prompt_chars": len(prompt),
+                                     "audio_bytes": len(audio) if audio is not None else 0})
 
 
 # ---------- Gemini TTS (Interactions API) ----------

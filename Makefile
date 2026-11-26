@@ -3,7 +3,7 @@ PY ?= .venv/bin/python
 RUN = "$(PY)" run.py
 
 .PHONY: help setup smoke validate script narration timing radio refs keyframes shots music \
-        assemble film shot kaggle-export import costs report techdoc test clean
+        assemble film shot kaggle-export import costs langtest report techdoc test clean
 
 help:            ## list targets
 	@grep -E '^[a-z-]+:.*##' $(MAKEFILE_LIST) | sed 's/:.*##/\t/'
@@ -53,6 +53,8 @@ import:          ## bring Kaggle results back: make import ZIP=~/Downloads/herit
 
 costs:           ## summarise runs.jsonl into COSTS.md
 	$(RUN) costs
+langtest:        ## E16: TTS intelligibility by ASR round trip (makes Gemini calls once, then cached)
+	$(RUN) langtest
 report:          ## export docs/REPORT.md to PDF and Word for the submission form
 	"$(PY)" docs/export_report.py
 techdoc:         ## build PROJECT_TECHNICAL_DOCUMENTATION.pdf (needs Google Chrome + poppler-utils)

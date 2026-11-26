@@ -26,6 +26,7 @@ COMMANDS = {
     "music":         ("pipeline.music",     "Stage 3: prepare the chosen score (or the temp pad)"),
     "assemble":      ("pipeline.assemble",  "Stage 5: edit, duck, subtitle, normalise, end card, 9:16 + 16:9"),
     "costs":         ("pipeline.costs",     "Summarise runs.jsonl into COSTS.md"),
+    "langtest":      ("pipeline.langtest",  "E16: TTS intelligibility by ASR round trip (Amharic + 3 languages)"),
 }
 FILM = ["validate", "narration", "keyframes", "shots", "music", "assemble"]
 

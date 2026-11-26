@@ -1,0 +1,125 @@
+{
+  "models": {
+    "asr_and_translation": "gemini-flash-lite-latest",
+    "tts": "gemini-3.8-flash-tts",
+    "voice": "Charon"
+  },
+  "amharic_narration": {
+    "lines": 9,
+    "mean_cer": 0.1479,
+    "mean_cer_homophones_folded": 0.1227,
+    "max_cer": 0.3182,
+    "worst_shot": "s05"
+  },
+  "s01_line": {
+    "en": 0.0,
+    "ti": 0.2703,
+    "om": 0.1081,
+    "so": 0.1974,
+    "am": 0.2258
+  },
+  "rows": [
+    {
+      "lang": "am",
+      "shot": "s01",
+      "reference": "በየማለዳው የእናቴ አሮጌ የቡና ስኒ ጸጥ ያለ ታሪክ ይነግረናል።",
+      "transcript": "ባይተዋለዳው የናቴ አሮጌ የቡና ስንይ ጸጥ ያለ ታሪክ ይነግረናል፡፡",
+      "cer": 0.2258,
+      "cer_homophones_folded": 0.2258
+    },
+    {
+      "lang": "am",
+      "shot": "s02",
+      "reference": "እናቴ ያደገችው በሸካ ዞን፣ የኪ ወረዳ ውስጥ ነው፤ ኑሮ ከባድ፣ ዕድልም ጥቂት በነበረበት ቦታ።",
+      "transcript": "እነዚህ ያደጉት በሼካዞን የኪወረዳ ውስጥ ነው። ኑሮ ከባድ እድልም ጥቂት በነበረበት ቦታ።",
+      "cer": 0.186,
+      "cer_homophones_folded": 0.1628
+    },
+    {
+      "lang": "am",
+      "shot": "s03",
+      "reference": "በዙሪያዋ ብዙ ችግር ቢኖርም፣ ታታሪ፣ አሳቢና ቆራጥ ሴት ሆና አደገች።",
+      "transcript": "በዙሪያዋ ብዙ ጥግ ይኖረዋል። ታታሪ አሳቢ እና ቆራጥ ሴት ሆና አደገች።",
+      "cer": 0.2188,
+      "cer_homophones_folded": 0.2188
+    },
+    {
+      "lang": "am",
+      "shot": "s04",
+      "reference": "ልጆቿን የማሳደግ ኃላፊነት ስትወስድ፣ ችግሮች ጥንካሬዋን፣ ትዕግስቷንና ቆራጥነቷን ፈተኑ።",
+      "transcript": "ልጆችዎን የማሳደግ ሃላፊነት ስትወስድ ችግሮች፣ ጥንካሬዋን፣ ትዕግስቷንና ቆራጥነቷን ፈታኑ።",
+      "cer": 0.0889,
+      "cer_homophones_folded": 0.0667
+    },
+    {
+      "lang": "am",
+      "shot": "s05",
+      "reference": "ጊዜዋን፣ ምቾቷንና ብዙ የራሷን ሕልሞች ሠዋች፤",
+      "transcript": "ጊዜዋን መችቶዋና ብዙ የራሷን ህልሞች ሰዎች",
+      "cer": 0.3182,
+      "cer_homophones_folded": 0.2273
+    },
+    {
+      "lang": "am",
+      "shot": "s06",
+      "reference": "እሷ ያላገኘችውን ዕድል እኛ እንድናገኝ።",
+      "transcript": "እሷ ያላገኘችውን እድል እኛ እንድናገኝ",
+      "cer": 0.05,
+      "cer_homophones_folded": 0.0
+    },
+    {
+      "lang": "am",
+      "shot": "s07",
+      "reference": "ፍቅሯ በቃል ብቻ አልተገለጸም፤ ስፍር ቁጥር በሌለው እንክብካቤ፣ ጽናትና መሥዋዕትነት ታየ።",
+      "transcript": "ፍቅር ዋ በቃል ብቻ አልተገለጸም ስፍር ቁጥር በሌለው እንክብካቤ ጽናትና መስዋዕትነት ታየ።",
+      "cer": 0.0682,
+      "cer_homophones_folded": 0.0455
+    },
+    {
+      "lang": "am",
+      "shot": "s08",
+      "reference": "ዛሬ እናውቃለን፤ የእናት ፍቅር የሚለካው በምትናገረው ብቻ ሳይሆን በምትሰጠው፣ በምትታገሰውና በምታደርገው ነው።",
+      "transcript": "ዛሬ እናውቃለን የናት ፍቅር የሚለካው በምትናገረው ብቻ ሳይሆን በምትሳጣው በምትታገሰውና በምትታደርገው ነው።",
+      "cer": 0.0714,
+      "cer_homophones_folded": 0.0714
+    },
+    {
+      "lang": "am",
+      "shot": "s09",
+      "reference": "ጊዜ ቢያልፍም፣ ያስተማረችን እሴቶችና የከፈለችው መሥዋዕትነት የቤተሰባችን ማንነት ሆነው ለመጪው ትውልድ ይኖራሉ።",
+      "transcript": "ጊዜያዊ አልፊም ያስተማረችን ሴቶችና የከፈለችው መስዋዕትነት የቤተሰባችን ማንነት ሆነው ለመጪው ትውልድ ይኖራሉ።",
+      "cer": 0.1034,
+      "cer_homophones_folded": 0.0862
+    },
+    {
+      "lang": "en",
+      "shot": "s01",
+      "reference": "Every morning, my mother's old coffee cup tells us a quiet story.",
+      "transcript": "Every morning, my mother's old coffee cup tells us a quiet story.",
+      "cer": 0.0
+    },
+    {
+      "lang": "ti",
+      "shot": "s01",
+      "reference": "куሉ ፡ ግዜ ፡ ንግሆ ፡ እቲ ፡ አረጊት ፡ Fინጃል ፡ ቡን ፡ ኣደይ ፡ ስቅ ፡ ዝበለ ፡ ታሪኽ ፡ ይነግረና ።",
+      "transcript": "ኩሉ ጊዜ ንጉሆ እቲ አረጊት ፈንጃል ቡን አደይ ሳቅ ዝበለ ታሪክ ይነግረና።",
+      "cer": 0.2703,
+      "cer_homophones_folded": 0.2703,
+      "foreign_letters_in_reference": "куfინ"
+    },
+    {
+      "lang": "om",
+      "shot": "s01",
+      "reference": "Ganama hundumaa, kopheen bunaa haadha tiyyaa moofaan seenaa calqisaa nuttiima odeessa.",
+      "transcript": "Ganama hundumaa qopheen bunaa haaraatiif yaamoon faan seenaa calqisaa nutti mawdeessa.",
+      "cer": 0.1081
+    },
+    {
+      "lang": "so",
+      "shot": "s01",
+      "reference": "Subax kasta, koobkii qaxwada ee hooyaday ee duugga ahaa wuxuu noo sheegaa sheeko xasilloon.",
+      "transcript": "Subax kasta koobki qaxwada ee hooyadeed ee duuga ahaw waxay nooshee kaase kooxhasi loon",
+      "cer": 0.1974
+    }
+  ]
+}

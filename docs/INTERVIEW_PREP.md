@@ -40,6 +40,10 @@ Reread: EXPERIMENTS.md. Know **E07** and **E04** well. Use the shape hypothesis 
   - *Change:* `voice.max_pause_s` set to 0.35, 0.45 and 0.55 s, with no model calls.
   - *Result:* 65.3, 67.9 and 70.0 s of narration.
   - *Decision:* 0.45 s gives an 84.4 s film. It still needs native ears to confirm it sounds natural (user test 1).
+- **E16, more languages, ASR round trip.**
+  - *Hypothesis:* if TTS speaks a line well, transcribing it back recovers the text; the English control should be about 0.
+  - *Result:* English 0.000; s01 line: Oromo 0.108, Somali 0.197, Amharic 0.226, Tigrinya 0.270. Amharic narration mean 0.148, or 0.123 with homophones folded; errors on first words and long inflected words; Tigrinya's *translation* had Cyrillic and Georgian letters in it.
+  - *Caveat:* the same model family transcribes, so it is intelligibility to Gemini, not to people.
 - Others worth knowing:
   - **E01:** "jebena" was drawn as a vase.
   - **E05:** a "no face" prompt still showed a profile.
@@ -60,7 +64,7 @@ Reread: FAILURES.md F03–F05 (the strongest) and F01, F07.
 - **F01, the smoke test had never run.** The output files were 0 bytes and there was no log. Lesson: a file existing is not evidence; the log is.
 - **F07, a "no face" prompt showed her profile.** That is a consent risk. I rewrote it to "directly behind, her back to the camera", and I now check every character keyframe by eye.
 
-## 4. "What did your audience tell you, and what changed?" ✍️
+## 4. "What did your audience tell you, and what changed?"
 
 Reread: DESIGN.md §4 and §5, and the `changelog` in `storyboard.json` (versions 2 and 3).
 

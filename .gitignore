@@ -15,6 +15,5 @@ outputs/final/mix_*
 # Kaggle job packaging (rebuilt by make kaggle-export)
 kaggle/job/
 kaggle/*.zip
-docs/REPORT.pdf
 docs/REPORT.docx
 docs/technical/build/

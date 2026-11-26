@@ -8,6 +8,13 @@
 
 Consent will be obtained before generating or publishing AI representations of my mother's likeness. Her approval of the narration will also be requested before final production.
 
+**Status at submission (26 Nov 2026): consent has not been obtained yet.** Therefore:
+- `consent.likeness_approved` and `consent.script_approved` stay `false`;
+- her face is never generated, and the exports keep the visible DRAFT mark;
+- the film is **not published publicly**, and no public post is made with it. For grading it is shared privately with the graders only (SUBMISSION.md).
+
+This row will be completed only with her real answer, never on her behalf.
+
 **How the pipeline enforces this** (so the record above is not just a promise):
 
 - `storyboard.json → consent.likeness_approved` is `false`. While it is false, the three shots that show her (s04, s06, s07) are generated from their `no_face_prompt` (seen from behind, or hands only), the character reference sheet is never generated, and the Wan motion prompts for those shots ask for the face to stay hidden. `runs.jsonl` logs a `consent_gate` line each time.

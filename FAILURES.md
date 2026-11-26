@@ -56,6 +56,12 @@ What broke, what I tried, and what fixed it or worked around it. Times are UTC o
 - **Wan 2.2.** The model card only shows text-to-video. The diffusers source confirms that `WanImageToVideoPipeline` supports TI2V-5B through `expand_timesteps` ("Wan2.2 ti2v"). Fixed: pinned `diffusers==0.43.0`, `expand_timesteps=True` passed explicitly, and a check that rejects black or NaN frames. Character shots are excluded by default (consent).
 - **Lesson:** "not run yet" code is untested code; reading the dependency's source is cheaper than a failed GPU session.
 
+## F11 · The text-model fallback named a model that does not exist
+- **Evidence:** 26 Nov, 15:35–15:38 UTC, during E16. `gemini-3.8-flash` returned 503 "high demand" on all 4 attempts again. The fallback then failed with **HTTP 404 "models/gemini-3.8-flash-lite is not found"**. The fallback added in F02 had never been exercised, so its model name had never been checked.
+- **Tried:** `ListModels` (`GET /v1beta/models`). There is no `gemini-3.8-flash-lite`; the Flash-Lite family is served as the stable alias `gemini-flash-lite-latest`. A probe on the same evening: 3.8 Flash 503; 3.5 Flash and `gemini-flash-latest` no answer within 40 s; `gemini-flash-lite-latest` HTTP 200.
+- **Fix:** the default fallback is now `gemini-flash-lite-latest` (`providers.py`, `.env.example`). E16 ran with `GEMINI_TEXT_MODEL=gemini-flash-lite-latest`. The model is part of every cache key and is recorded in the results.
+- **Lesson:** a fallback that has never run is untested code, like the notebooks in F10. Model names should be checked against `ListModels`, not assumed from the primary's name.
+
 ## Pending (filled in after the Kaggle runs)
 
 | Stage | What happened | What I tried | Resolution |

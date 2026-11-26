@@ -157,6 +157,17 @@ def test_subtitle_reading_speed(board):
             assert len(" ".join(lines)) / (end - start) <= 17
 
 
+def test_langtest_scoring():
+    """E16 scoring: punctuation and spaces ignored; Amharic homophone letters folded on request;
+    foreign letters inside Ge'ez text are detected."""
+    from pipeline.langtest import cer, fold_homophones, non_script_letters
+    assert cer("Hello, World!", "hello world") == 0
+    assert cer("ሕልሞች።", "ህልሞች") > 0 and cer("ሕልሞች።", "ህልሞች", fold=True) == 0
+    assert fold_homophones("ሠዋች ዕድል") == "ሰዋች እድል"
+    assert non_script_letters("куሉ ፡ ታሪኽ") == "ку"
+    assert cer("abcd", "abxd") == 0.25
+
+
 # ---------- Kaggle bridge ----------
 
 def test_kaggle_import_places_files_and_merges_log_once(sandbox):

@@ -73,6 +73,7 @@ Table: What is in scope, and its state at the time of writing (26 Nov 2026).
 | Radio cut for audience testing | Implemented, executed |
 | Script drafting with Gemini text (`run.py script`) | Implemented; **never executed** (the storyboard was drafted by the coding agent from the story notes, as its changelog records) |
 | Cost summary from the log (`make costs`) | Implemented, executed |
+| Language intelligibility test by ASR round trip (`make langtest`, E16) | Implemented, executed: 9 Amharic lines + 4 languages |
 | Graphical user interface | Out of scope: the pipeline is a command-line tool |
 
 Outside the code, two further limits apply: consent for the mother's likeness is still *Pending* in ETHICS.md, and the two audience tests have not yet been recorded in DESIGN.md. Chapter 11 lists all limitations.
@@ -150,7 +151,7 @@ Table: External models, how they are reached, and why they were chosen.
 | Model | Provider and access | Why it was selected | Role |
 |---|---|---|---|
 | **Gemini 3.8 Flash TTS** | Gemini API, *Interactions* endpoint `POST /v1beta/interactions`, key in header `x-goog-api-key` | Free tier; supports Amharic; offers stock voices, so no one's voice is cloned; style instructions in natural language | Stage 4: one WAV per narration line (voice *Charon*) |
-| **Gemini 3.8 Flash** (fallback **Flash-Lite**) | Gemini API, `POST /v1beta/models/{model}:generateContent` | Free tier; JSON output mode | Optional `script` stage (drafts a storyboard). Smoke test only so far |
+| **Gemini 3.8 Flash** (fallback **Flash-Lite**) | Gemini API, `POST /v1beta/models/{model}:generateContent` | Free tier; JSON output mode | Optional `script` stage (drafts a storyboard), never run; transcription and translation in the language test (E16), run with the fallback `gemini-flash-lite-latest` |
 | **FLUX.2 klein 4B** | Cloudflare Workers AI REST, `POST /client/v4/accounts/{account}/ai/run/@cf/black-forest-labs/flux-2-klein-4b`, multipart form, `Authorization: Bearer` | Daily free allowance (10,000 neurons); fast (4 fixed steps, about 10 s per image); accepts up to 4 reference images | Stage 1: keyframes and reference sheets |
 | **Wan 2.2 TI2V-5B** | Kaggle notebook (T4 GPU) via 🤗 diffusers `WanImageToVideoPipeline`, weights `Wan-AI/Wan2.2-TI2V-5B-Diffusers` | Open weights (Apache 2.0); image-to-video that fits a 16 GB T4 with fp16 and CPU offload | Stage 2: optional 5 s clips per keyframe (**not yet run**) |
 | **ACE-Step 1.5** (`acestep-v15-turbo`) | Kaggle notebook, the project's Python API (`AceStepHandler`, `generate_music`) | Open weights; outputs usable commercially; caption, bpm and key control | Stage 3: three score candidates (**not yet run**) |
@@ -195,7 +196,7 @@ Table: The whole stack by layer.
 | Media processing | FFmpeg/ffprobe, Pillow, a pure-Python pause compressor |
 | Observability | `runs.jsonl` (append-only JSON Lines), `make costs` |
 | GPU work | Kaggle notebooks (diffusers Wan 2.2, ACE-Step 1.5) bridged by `kaggle_io.py` |
-| Quality gates | pytest (24 tests), `assemble.verify` → `report.json` |
+| Quality gates | pytest (25 tests), `assemble.verify` → `report.json` |
 | Secrets | `.env` loaded by python-dotenv; git-ignored |
 
 # System Architecture
@@ -477,6 +478,7 @@ Table: Failures met during the build, and their fixes.
 | F07 | "No face" prompt still showed a profile | "Directly behind, her back to the camera"; manual check of every character keyframe |
 | F08 | Style reference made keyframes worse | `use_style_reference: false` |
 | F09 | `aevalsrc` comma parsing; `ass=` filter and paths with spaces; orphan subtitle word | Quoted expression; run FFmpeg with `cwd`; balanced wrapping |
+| F11 | Text-model fallback named a model that does not exist (HTTP 404), found when 3.8 Flash was overloaded during E16 | Checked `ListModels`; fallback is now `gemini-flash-lite-latest` |
 | F10 | Kaggle notebooks, checked against library source before the first GPU run: ACE-Step ignored seeds, init failures did not raise, `pip install -e` cannot resolve its deps | `use_random_seed=False`; check the `ok` flag; official `uv sync`; Wan pinned to diffusers 0.43.0 with `expand_timesteps=True` |
 
 ## Final execution
@@ -861,6 +863,7 @@ Table: Auxiliary modules.
 | `costs.py` | `summarise`, `table`, `main` | Groups `runs.jsonl` by stage and model; rewrites the table between `<!-- costs:start -->` and `<!-- costs:end -->` in COSTS.md |
 | `script.py` | `main` | Prompts Gemini with DESIGN.md, the notes and the schema; writes `storyboard.draft.json` (never overwrites `storyboard.json`) and validates it. Not yet executed |
 | `smoke.py` | `main` | One call per provider plus an FFmpeg check; prints a status table |
+| `langtest.py` | `run`, `cer`, `fold_homophones`, `non_script_letters` | E16: transcribes TTS audio back with Gemini and scores it by character error rate; Ethiopic homophone letters can be folded; cached in `outputs/langtest/` |
 
 @@code pipeline/costs.py::summarise
 
@@ -1081,6 +1084,7 @@ Table: Commands, with their effect and whether they can call a hosted model.
 | `make radio` | Radio cut | no |
 | `make kaggle-export` / `make import ZIP=…` | Kaggle bridge | no (GPU work happens on Kaggle) |
 | `make costs` | Refresh the COSTS.md table | no |
+| `make langtest` | E16 language round trip | only for uncached items |
 | `make test` | Offline test suite | no |
 | `make report` | Report → PDF and DOCX | no |
 | `make techdoc` | Rebuild this document (`PROJECT_TECHNICAL_DOCUMENTATION.pdf`) | no |
@@ -1173,7 +1177,7 @@ The suite follows three rules:
 
 ## Implemented tests
 
-Table: The 24 tests (`tests/test_storyboard.py`: 10 including 2 parametrised cases; `tests/test_pipeline.py`: 14).
+Table: The 25 tests (`tests/test_storyboard.py`: 10 including 2 parametrised cases; `tests/test_pipeline.py`: 15).
 
 | Test | Verifies | Expected result |
 |---|---|---|
@@ -1197,6 +1201,7 @@ Table: The 24 tests (`tests/test_storyboard.py`: 10 including 2 parametrised cas
 | `test_character_sheet_skipped_without_consent` | `make_refs` without consent | no character-sheet prompt sent |
 | `test_compress_pauses_shortens_long_silence` | A 1.2 s gap capped at 0.4 s | 0.8 s removed; 2.2 s output (±0.06) |
 | `test_subtitle_cues_fit_the_frame` | Every cue, every aspect | 1–2 lines, within width, end > start |
+| `test_langtest_scoring` | E16 scoring: punctuation ignored, homophone folding, foreign letters in Ge'ez detected | exact values |
 | `test_subtitle_reading_speed` | With the real committed narration, every cue (E15) | ≤ 17 characters/s and ≥ 1 s on screen |
 | `test_kaggle_import_places_files_and_merges_log_once` | Import twice | files in place; one Kaggle log line |
 | `test_end_to_end_offline` | Whole film at small sizes (180×320, 320×180) | both exports pass verification, 60–90 s, video + audio streams, SRT and ASS written, `mix` logged |
@@ -1225,7 +1230,7 @@ tests/test_storyboard.py::test_render_limits[bad1] PASSED
 ============================= 23 passed in 57.67s ==============================
 ```
 
-An earlier run, on 25 November, also passed all 23 tests (49 s). After `test_subtitle_reading_speed` was added (E15), the suite was run again on 26 November at about 17:45 EAT: **24 passed in 47.82 s**.
+An earlier run, on 25 November, also passed all 23 tests (49 s). After `test_subtitle_reading_speed` was added (E15), the suite was run again on 26 November at about 17:45 EAT: **24 passed in 47.82 s**; after `test_langtest_scoring` was added (E16), **25 passed in 63.84 s**.
 
 ## Input validation and runtime verification
 
@@ -1367,8 +1372,8 @@ Table: Limitations at the time of writing.
 | Music | The score is the FFmpeg placeholder pad; no ACE-Step candidate exists yet, so `music.chosen_seed` is null |
 | Consent | Likeness consent and script approval are pending; exports carry a DRAFT mark and must not be published |
 | Character consistency | No character reference sheet (consent-gated); the mother is shown only from behind or through her hands |
-| Audience | The two required audience tests (radio cut, near-final cut) are not yet recorded in DESIGN.md |
-| Language quality | Amharic pronunciation has not yet been reviewed by native listeners; TTS has no seed, so takes are not reproducible |
+| Audience | The two required audience tests (radio cut, near-final cut) were not run; DESIGN.md states this, and §6 lists automated checks that are explicitly not audience evidence |
+| Language quality | Measured by ASR round trip only (E16: Amharic mean CER 0.123 with homophones folded, four flagged words); not yet reviewed by native listeners. TTS has no seed, so takes are not reproducible |
 | Motif accuracy | Keyframes show a generic cup; the real cup's appearance has not been described, and the pipeline does not invent it |
 | Script stage | Implemented but never executed |
 | Cache keys | Code changes do not invalidate caches automatically, except segments (manual version number); `make clean` or `--force` is needed after changing filter code |
@@ -1440,7 +1445,7 @@ Every model output is cached under a hash of its inputs; every call is retried s
 - **Resilience:** quota-aware retries that read the provider's own wait hint and fail fast on daily limits; fallbacks at every GPU-dependent step.
 - **Measured quality:** −14.04 LUFS and −1.76 dBTP on both exports; music ducked by 13 dB under speech; six automatic output checks.
 - **Ethics in code:** the likeness gate, script-approval watermark and AI disclosure are enforced by the pipeline, not left to memory.
-- **Evidence:** more than 130 log lines, 11 recorded experiments, 10 documented failures and 24 passing tests.
+- **Evidence:** more than 170 log lines, 12 recorded experiments, 11 documented failures and 25 passing tests.
 
 ## What the project demonstrates technically
 
