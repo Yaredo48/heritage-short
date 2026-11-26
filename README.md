@@ -1,5 +1,7 @@
 # The Silent Language of a Mother's Love
 
+[![tests](https://github.com/Yaredo48/heritage-short/actions/workflows/tests.yml/badge.svg)](https://github.com/Yaredo48/heritage-short/actions/workflows/tests.yml)
+
 A 60–90 second short film about my mother, who grew up in Yeki Woreda, Sheka Zone, in southwest Ethiopia, and the sacrifices she made for her children. It is narrated in Amharic with English subtitles and an original score, and exported in 9:16 and 16:9.
 
 The film is not edited by hand. This repository is a small pipeline that turns one file, [`storyboard.json`](storyboard.json), into keyframes, moving shots, music, narration and a finished, verified edit. One command rebuilds it.

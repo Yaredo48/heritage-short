@@ -46,6 +46,7 @@ The TTS limit is the binding constraint for this film. 9 lines need 9 calls, so 
 | `make film` with everything cached | 5 min 26 s | no model calls, only FFmpeg |
 | `make film` on a fresh `git clone`, no `.env` | 7 min 40 s, exit 0 | **0 model calls, 18 cache hits**; segments re-rendered by FFmpeg; both exports verified (25 Nov) |
 | Test suite (`make test`) | 48–58 s | 24 tests, fake models, real FFmpeg |
+| GitHub Actions, clean Ubuntu 24.04 runner (`.github/workflows/tests.yml`) | 1 min 8 s for the whole job, all steps green (26 Nov, run 45862903399) | fresh checkout, no `.env`: validate, timing from committed narration, 25 tests |
 
 ## GPU stages (Kaggle), to fill from runs.jsonl after import
 
